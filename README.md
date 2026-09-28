@@ -14,7 +14,8 @@ computer in a web browser: no install, no internet and no server needed.
 
 ## Playing
 
-1. Download this folder (for example **Code → Download ZIP** on GitHub) and unzip it.
+1. Download this folder and unzip it. On GitHub, pick the branch that contains the game, then
+   **Code → Download ZIP**.
 2. Put your art folders next to `index.html` (see below). This step is optional.
 3. Start the game:
    - **Windows:** double-click `Play.bat`.
