@@ -616,6 +616,59 @@
       ctx.stroke();
       return;
     }
+    if (outfitTag === 'night') {
+      // silk sleeping robe, loosely tied: bare collarbones, satin sheen
+      skinT();
+      ctx.strokeStyle = U.rgba(U.shade(L.skin, -0.35), 0.7);
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(150, 420);
+      ctx.quadraticCurveTo(175, 426, 192, 418);
+      ctx.moveTo(250, 420);
+      ctx.quadraticCurveTo(225, 426, 208, 418);
+      ctx.stroke();
+      const SILK = { tsunade: '#6e2440', sakura: '#8a2a4a', hinata: '#4e3e86', ino: '#4a3a7a', tenten: '#7a2626', temari: '#27365e', naruto: '#2a2c3a' };
+      const silk = SILK[L.id] || U.shade(U.mix(NR.CHARS[L.id] ? NR.CHARS[L.id].color : top, '#5a2a4a', 0.55), -0.1);
+      const robe = P();
+      robe.moveTo(0, 520);
+      robe.lineTo(0, 440);
+      robe.bezierCurveTo(40, 410, 110, 396, 150, 394);
+      robe.bezierCurveTo(170, 440, 186, 480, 198, 520);
+      robe.closePath();
+      robe.moveTo(400, 520);
+      robe.lineTo(400, 440);
+      robe.bezierCurveTo(360, 410, 290, 396, 250, 394);
+      robe.bezierCurveTo(232, 440, 214, 480, 202, 520);
+      robe.closePath();
+      clip(() => {
+        cel(ctx, robe, silk, { ox: 6, oy: 6, lw: 2 });
+        // satin highlights
+        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.moveTo(60, 470);
+        ctx.quadraticCurveTo(110, 430, 150, 418);
+        ctx.moveTo(340, 470);
+        ctx.quadraticCurveTo(290, 430, 252, 418);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+        ctx.lineWidth = 16;
+        ctx.beginPath();
+        ctx.moveTo(30, 510);
+        ctx.quadraticCurveTo(80, 470, 130, 452);
+        ctx.stroke();
+      });
+      // piping on the collar
+      ctx.strokeStyle = U.light(silk, 0.35);
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(150, 396);
+      ctx.bezierCurveTo(170, 440, 186, 480, 198, 520);
+      ctx.moveTo(250, 396);
+      ctx.bezierCurveTo(232, 440, 214, 480, 202, 520);
+      ctx.stroke();
+      return;
+    }
     if (outfitTag === 'kimono') {
       const base = U.mix(NR.CHARS[L.id] ? NR.CHARS[L.id].color : top, '#ffffff', 0.15);
       cel(ctx, tp, base);
@@ -1533,6 +1586,58 @@
     ctx.fill();
   }
 
+  // Her real age: soft lines at the eyes and mouth (Tsunade without her Transformation).
+  function drawAgeLines(ctx, L) {
+    ctx.save();
+    ctx.strokeStyle = U.rgba(U.shade(L.skin, -0.45), 0.62);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (const s of [-1, 1]) {
+      const ex = 200 + s * 96;
+      // crow's feet
+      for (const [dy, len] of [[-6, 16], [4, 18], [14, 14]]) {
+        ctx.moveTo(ex, 238 + dy);
+        ctx.quadraticCurveTo(ex + s * len * 0.5, 238 + dy + 2, ex + s * len, 238 + dy + (dy > 0 ? 5 : -3));
+      }
+      // lines under the eyes
+      ctx.moveTo(200 + s * 34, 268);
+      ctx.quadraticCurveTo(200 + s * 56, 276, 200 + s * 80, 268);
+      // smile lines
+      ctx.moveTo(200 + s * 40, 300);
+      ctx.quadraticCurveTo(200 + s * 50, 330, 200 + s * 36, 352);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+  // Silvering hair: tint the hair shapes toward silver, then add soft, broad streaks.
+  function silverTint(ctx, path) {
+    ctx.save();
+    ctx.clip(path);
+    ctx.fillStyle = 'rgba(214,216,226,0.32)';
+    ctx.fillRect(0, 0, 400, 520);
+    ctx.restore();
+  }
+  function silverStreaks(ctx, H, cap) {
+    const clipP = new Path2D();
+    clipP.addPath(H.front);
+    if (cap) clipP.addPath(cap);
+    silverTint(ctx, clipP);
+    ctx.save();
+    ctx.clip(clipP);
+    ctx.lineCap = 'round';
+    const r = U.rng(56);
+    for (let i = 0; i < 9; i++) {
+      const x = 110 + r() * 180, y = 30 + r() * 60;
+      ctx.strokeStyle = `rgba(240,242,248,${0.25 + r() * 0.2})`;
+      ctx.lineWidth = 8 + r() * 8;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + (r() - 0.5) * 20, y + 50, x + (x < 200 ? -30 : 30), y + 110, x + (x < 200 ? -50 : 50), y + 200);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   // ---------- assemble ----------
   function render(ch, emo, outfit, scale) {
     const L = NR.spritegen.normLook(ch.look);
@@ -1554,10 +1659,15 @@
     const H = { back: P(), pre: P(), cap: P(), front: P(), over: P() };
     (HS[L.style] || HS.short)(H);
     const col = L.hairColor;
+    // outfit may combine tags, e.g. "onsen+aged"
+    const tags = String(outfit || '').split('+').filter(Boolean);
+    const aged = tags.includes('aged');
+    outfit = tags.find((t) => t !== 'aged') || null;
     const onsen = outfit === 'onsen';
 
-    if (!onsen) drawBackAcc(ctx, L);
+    if (!onsen && outfit !== 'night') drawBackAcc(ctx, L);
     hairCel(ctx, H.back, col);
+    if (aged) silverTint(ctx, H.back);
     drawClothes(ctx, L, outfit);
     const np = neckPath();
     cel(ctx, np, L.skin, { ox: 8, oy: 0, depth: 0.18, lw: 2.2 });
@@ -1568,10 +1678,11 @@
     ctx.translate(0, 26);
     ctx.fill(facePath(L));
     ctx.restore();
+    const bare = onsen || outfit === 'kimono' || outfit === 'night';
     if (L.outfit === 'cloak' || L.outfit === 'coat') {
-      if (!onsen && outfit !== 'kimono') drawClothes(ctx, L, outfit); // collar over neck
+      if (!bare) drawClothes(ctx, L, outfit); // collar over neck
     }
-    if (!onsen && outfit !== 'kimono') drawNeckAcc(ctx, L);
+    if (!bare) drawNeckAcc(ctx, L);
     else if (L.acc.includes('necklace')) drawNeckAcc(ctx, { acc: ['necklace'] });
     // ears
     for (const s of [-1, 1]) {
@@ -1602,6 +1713,7 @@
     const masked = L.acc.includes('mask') || L.acc.includes('facecloth');
     if (!masked && L.style !== 'hood') drawMouth(ctx, L, E);
     drawFaceMarks(ctx, L, E);
+    if (aged) drawAgeLines(ctx, L);
     if (masked) drawMask(ctx, L);
     if (L.acc.includes('glasses')) {
       ctx.fillStyle = '#16181e';
@@ -1633,6 +1745,7 @@
     }
     hairCel(ctx, H.front, col);
     if (H.gloss) hairShine(ctx, H.front, col, H);
+    if (aged) silverStreaks(ctx, H, H.noCap ? null : capPath(L.style));
     if (H.strands) {
       ctx.strokeStyle = U.rgba(U.shade(col, -0.45), 0.8);
       ctx.lineWidth = 2.2;

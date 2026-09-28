@@ -1614,4 +1614,493 @@
       glow(x, W * 0.5, H * 0.5, 700 * f, '#ffaa60', 0.12);
     },
   };
+
+  // ---------- Tsunade's chapters ----------
+  function scrollPile(x, cx, cy, n, seed) {
+    const r = U.rng(seed);
+    for (let i = 0; i < n; i++) {
+      const px = cx + (r() - 0.5) * 120, py = cy - i * 7 + (r() - 0.5) * 6;
+      x.save();
+      x.translate(px, py);
+      x.rotate((r() - 0.5) * 0.6);
+      x.fillStyle = r() < 0.5 ? '#efe3c4' : '#e4d4b0';
+      x.fillRect(-40, -6, 80, 12);
+      x.fillStyle = '#8a3a2a';
+      x.fillRect(-44, -7, 6, 14);
+      x.fillRect(38, -7, 6, 14);
+      x.restore();
+    }
+  }
+  function candle(x, px, py, h = 34) {
+    x.fillStyle = '#f4ead0';
+    x.fillRect(px - 7, py - h, 14, h);
+    x.fillStyle = 'rgba(0,0,0,0.12)';
+    x.fillRect(px + 2, py - h, 5, h);
+    x.fillStyle = '#3a2a20';
+    x.fillRect(px - 12, py - 2, 24, 5);
+  }
+  function flame(x, px, py, t, s = 1) {
+    const f = 1 + Math.sin(t * 13 + px) * 0.1 + Math.sin(t * 7.3 + py) * 0.06;
+    glow(x, px, py - 6 * s, 150 * s * f, '#ffb868', 0.34);
+    x.fillStyle = '#ffd98a';
+    x.beginPath();
+    x.ellipse(px, py - 8 * s, 4.5 * s, 10 * s * f, Math.sin(t * 5 + px) * 0.08, 0, U.TAU);
+    x.fill();
+    x.fillStyle = '#fff6d8';
+    x.beginPath();
+    x.ellipse(px, py - 5 * s, 2 * s, 4.5 * s, 0, 0, U.TAU);
+    x.fill();
+  }
+
+  DEF.hospital_night = {
+    paint(x) {
+      // plaster walls in lamplight, dark wood trim
+      const wall = x.createLinearGradient(0, 0, 0, H * 0.64);
+      wall.addColorStop(0, '#2e3448');
+      wall.addColorStop(1, '#4a4e5e');
+      x.fillStyle = wall;
+      x.fillRect(0, 0, W, H * 0.64);
+      x.fillStyle = '#2a2018';
+      x.fillRect(0, 0, W, 26);
+      x.fillRect(0, H * 0.64 - 10, W, 10);
+      // tall window: the sleeping village
+      const wx = W * 0.58, wy = 60, ww = 380, wh = 300;
+      const out = x.createLinearGradient(0, wy, 0, wy + wh);
+      out.addColorStop(0, '#08102c');
+      out.addColorStop(1, '#22284c');
+      x.fillStyle = out;
+      x.fillRect(wx, wy, ww, wh);
+      x.save();
+      x.beginPath();
+      x.rect(wx, wy, ww, wh);
+      x.clip();
+      stars(x, 60, 131, H * 0.5);
+      moon(x, wx + ww * 0.24, wy + 70, 30);
+      monument(x, wx + ww * 0.6, wy + 190, 420, 90, { rock: '#1e2440', leaf: '#101830', noTrees: true });
+      for (let i = 0; i < 7; i++) building(x, wx - 20 + i * 64, wy + wh + 2, 60, 50 + ((i * 29) % 50), { flat: i % 2 === 0, tank: i % 3 === 0, roof: '#1c1e34', wall: '#1a1e36', night: true, seed: 1300 + i });
+      x.restore();
+      x.strokeStyle = '#3a2a1e';
+      x.lineWidth = 12;
+      x.strokeRect(wx, wy, ww, wh);
+      x.lineWidth = 5;
+      x.beginPath();
+      x.moveTo(wx + ww / 2, wy);
+      x.lineTo(wx + ww / 2, wy + wh);
+      x.moveTo(wx, wy + wh * 0.55);
+      x.lineTo(wx + ww, wy + wh * 0.55);
+      x.stroke();
+      // moonlight falling into the room
+      x.save();
+      x.globalCompositeOperation = 'lighter';
+      const mg = x.createLinearGradient(wx, wy, wx - 200, H);
+      mg.addColorStop(0, 'rgba(140,170,255,0.16)');
+      mg.addColorStop(1, 'rgba(140,170,255,0)');
+      x.fillStyle = mg;
+      x.beginPath();
+      x.moveTo(wx, wy);
+      x.lineTo(wx + ww, wy);
+      x.lineTo(wx + ww - 120, H);
+      x.lineTo(wx - 320, H);
+      x.closePath();
+      x.fill();
+      x.restore();
+      // shelves of scrolls and books
+      for (const sy of [96, 196, 296]) {
+        x.fillStyle = '#3a2a1e';
+        x.fillRect(40, sy + 60, W * 0.46, 12);
+        const r = U.rng(sy);
+        let px = 52;
+        while (px < W * 0.46) {
+          const bw = 14 + r() * 18, bh = 44 + r() * 16;
+          if (r() < 0.3) {
+            // rolled scrolls stacked
+            for (let k = 0; k < 3; k++) {
+              x.fillStyle = ['#e8dcc0', '#d8c8a0', '#f0e6cc'][k];
+              x.beginPath();
+              x.ellipse(px + 14, sy + 52 - k * 16, 14, 8, 0, 0, U.TAU);
+              x.fill();
+              x.fillStyle = '#8a2a2a';
+              x.beginPath();
+              x.arc(px + 14, sy + 52 - k * 16, 3, 0, U.TAU);
+              x.fill();
+            }
+            px += 34;
+          } else {
+            x.fillStyle = U.pick(['#6a2a2a', '#2a4a6a', '#3a5a3a', '#5a4a2a', '#4a2a5a']);
+            x.fillRect(px, sy + 60 - bh, bw, bh);
+            x.fillStyle = 'rgba(255,230,180,0.25)';
+            x.fillRect(px + 2, sy + 60 - bh + 6, bw - 4, 3);
+            px += bw + 2;
+          }
+        }
+      }
+      // anatomy chart of the chakra network
+      x.fillStyle = '#e8e0cc';
+      x.fillRect(W * 0.49, 90, 90, 150);
+      x.strokeStyle = '#6a8ac8';
+      x.lineWidth = 2;
+      x.beginPath();
+      x.arc(W * 0.49 + 45, 120, 13, 0, U.TAU);
+      x.moveTo(W * 0.49 + 45, 133);
+      x.lineTo(W * 0.49 + 45, 200);
+      x.moveTo(W * 0.49 + 20, 160);
+      x.lineTo(W * 0.49 + 70, 160);
+      x.moveTo(W * 0.49 + 45, 200);
+      x.lineTo(W * 0.49 + 28, 232);
+      x.moveTo(W * 0.49 + 45, 200);
+      x.lineTo(W * 0.49 + 62, 232);
+      x.stroke();
+      x.fillStyle = '#c84a4a';
+      for (const [dx, dy] of [[45, 150], [45, 175], [33, 160], [57, 160], [45, 195]]) {
+        x.beginPath();
+        x.arc(W * 0.49 + dx, dy, 3, 0, U.TAU);
+        x.fill();
+      }
+      floor(x, H * 0.64, 'wood', { col: '#5a4030' });
+      // the desk, buried in research
+      const dg = x.createLinearGradient(0, H * 0.7, 0, H);
+      dg.addColorStop(0, '#6a4a30');
+      dg.addColorStop(1, '#3a2618');
+      x.fillStyle = dg;
+      x.fillRect(W * 0.18, H * 0.74, W * 0.64, H * 0.26);
+      x.fillStyle = '#8a6040';
+      x.fillRect(W * 0.16, H * 0.72, W * 0.68, 18);
+      scrollPile(x, W * 0.3, H * 0.71, 6, 31);
+      scrollPile(x, W * 0.7, H * 0.71, 4, 37);
+      // open scroll with the Hollow Moon seal
+      x.fillStyle = '#f2e8cc';
+      x.fillRect(W * 0.42, H * 0.7, 200, 24);
+      x.strokeStyle = '#6a3a8a';
+      x.lineWidth = 2;
+      x.beginPath();
+      x.arc(W * 0.42 + 100, H * 0.7 + 12, 9, 0, U.TAU);
+      x.arc(W * 0.42 + 104, H * 0.7 + 12, 6, 0, U.TAU);
+      x.stroke();
+      // sake bottle hidden behind the reports
+      x.fillStyle = '#f2ece0';
+      x.beginPath();
+      x.moveTo(W * 0.78 - 5, H * 0.72 - 60);
+      x.quadraticCurveTo(W * 0.78 - 4, H * 0.72 - 36, W * 0.78 - 16, H * 0.72 - 16);
+      x.quadraticCurveTo(W * 0.78 - 20, H * 0.72, W * 0.78, H * 0.72);
+      x.quadraticCurveTo(W * 0.78 + 20, H * 0.72, W * 0.78 + 16, H * 0.72 - 16);
+      x.quadraticCurveTo(W * 0.78 + 4, H * 0.72 - 36, W * 0.78 + 5, H * 0.72 - 60);
+      x.fill();
+      x.fillStyle = '#3a4a8a';
+      x.fillRect(W * 0.78 - 14, H * 0.72 - 24, 28, 5);
+      // desk lamp
+      const lx = W * 0.22, ly = H * 0.72;
+      x.fillStyle = '#2a2a30';
+      x.fillRect(lx - 4, ly - 90, 8, 90);
+      x.fillRect(lx - 26, ly - 8, 52, 8);
+      x.fillStyle = '#3a5a3a';
+      x.beginPath();
+      x.moveTo(lx - 40, ly - 86);
+      x.lineTo(lx + 40, ly - 86);
+      x.lineTo(lx + 24, ly - 120);
+      x.lineTo(lx - 24, ly - 120);
+      x.closePath();
+      x.fill();
+      vignette(x, 0.55);
+    },
+    anim(x, t) {
+      const f = 1 + Math.sin(t * 3) * 0.02;
+      glow(x, W * 0.22, H * 0.72 - 80, 420 * f, '#ffc078', 0.3);
+      glow(x, W * 0.4, H * 0.78, 520, '#ffb070', 0.1);
+    },
+    weather: 'dust',
+  };
+
+  DEF.hidden_spring = {
+    paint(x) {
+      // cavern: dark rock framing a moonlit opening
+      x.fillStyle = '#0a0c14';
+      x.fillRect(0, 0, W, H);
+      const hole = new Path2D();
+      hole.ellipse(W * 0.52, H * 0.16, 250, 120, 0.05, 0, U.TAU);
+      x.save();
+      x.clip(hole);
+      sky(x, [[0, '#060a24'], [1, '#1e2658']]);
+      stars(x, 120, 171, H * 0.4);
+      moon(x, W * 0.6, H * 0.12, 34, '#fff8e8');
+      for (let i = 0; i < 7; i++) foliage(x, W * 0.3 + i * 70, H * 0.3, 60, 30, '#0e1e1e', 1700 + i);
+      x.restore();
+      // layered rock walls with rim light
+      const rockLayer = (seed, col, rim, inset) => {
+        const r = U.rng(seed);
+        const p = new Path2D();
+        p.moveTo(0, 0);
+        p.lineTo(W, 0);
+        p.lineTo(W, H);
+        let px = W;
+        let py = H * (0.6 + inset);
+        p.lineTo(W, py);
+        while (px > W * 0.72) {
+          px -= 30 + r() * 50;
+          py -= 20 + r() * 50;
+          p.lineTo(px, Math.max(inset * 200, py));
+        }
+        p.quadraticCurveTo(W * 0.52, -60 + inset * 300, W * 0.3, 40 + inset * 160);
+        px = W * 0.3;
+        py = 40 + inset * 160;
+        while (px > 0) {
+          px -= 30 + r() * 50;
+          py += 20 + r() * 50;
+          p.lineTo(px, py);
+        }
+        p.lineTo(0, H);
+        p.lineTo(W, H);
+        p.closePath();
+        x.save();
+        x.fillStyle = col;
+        x.fill(p, 'evenodd');
+        x.restore();
+      };
+      rockLayer(3, '#141824', '#3a4a6a', 0);
+      // cave walls left and right
+      for (const side of [0, 1]) {
+        const g = x.createLinearGradient(side ? W : 0, 0, side ? W * 0.62 : W * 0.38, 0);
+        g.addColorStop(0, '#07080e');
+        g.addColorStop(1, 'rgba(20,24,36,0)');
+        x.fillStyle = g;
+        x.fillRect(0, 0, W, H);
+      }
+      // glowing moss and crystals
+      const r = U.rng(9);
+      for (let i = 0; i < 26; i++) {
+        const side = i % 2;
+        const px = side ? W - 40 - r() * 260 : 40 + r() * 260, py = 120 + r() * 360;
+        const c = r() < 0.5 ? '#6ae8d0' : '#b88aff';
+        glow(x, px, py, 40 + r() * 40, c, 0.25);
+        x.fillStyle = U.rgba(c, 0.9);
+        x.beginPath();
+        x.moveTo(px, py - 16 - r() * 16);
+        x.lineTo(px + 7, py);
+        x.lineTo(px - 7, py);
+        x.closePath();
+        x.fill();
+      }
+      // waterfall at the back
+      const fx = W * 0.5, fw = 90;
+      const wf = x.createLinearGradient(fx - fw / 2, 0, fx + fw / 2, 0);
+      wf.addColorStop(0, 'rgba(160,210,255,0.25)');
+      wf.addColorStop(0.5, 'rgba(220,240,255,0.7)');
+      wf.addColorStop(1, 'rgba(160,210,255,0.25)');
+      x.fillStyle = wf;
+      x.fillRect(fx - fw / 2, H * 0.22, fw, H * 0.34);
+      // back rocks around the pool
+      const back = x.createLinearGradient(0, H * 0.48, 0, H * 0.62);
+      back.addColorStop(0, '#2a3040');
+      back.addColorStop(1, '#161a24');
+      x.fillStyle = back;
+      x.beginPath();
+      x.moveTo(0, H * 0.62);
+      for (let i = 0; i <= 12; i++) x.lineTo((i / 12) * W, H * (0.5 + ((i * 37) % 7) / 100) + Math.sin(i) * 10);
+      x.lineTo(W, H * 0.62);
+      x.closePath();
+      x.fill();
+      // the steaming pool
+      const pool = new Path2D();
+      pool.ellipse(W * 0.5, H * 0.78, W * 0.46, H * 0.2, 0, 0, U.TAU);
+      x.save();
+      x.clip(pool);
+      water(x, H * 0.56, '#2f7a8a', '#123a4a');
+      x.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 16; i++) {
+        x.fillStyle = `rgba(200,230,255,${0.24 - i * 0.013})`;
+        x.fillRect(W * 0.5 - 50 + Math.sin(i * 1.7) * 30, H * 0.6 + i * 12, 100 - i * 4, 3);
+      }
+      for (let i = 0; i < 30; i++) {
+        const c = i % 2 ? '#6ae8d0' : '#b88aff';
+        glow(x, W * 0.1 + ((i * 97) % (W * 0.8)), H * 0.62 + ((i * 53) % 120), 30, c, 0.08);
+      }
+      x.restore();
+      // warm flat stones at the edge
+      for (const [px, py, rw] of [[W * 0.12, H * 0.8, 110], [W * 0.86, H * 0.82, 120], [W * 0.3, H * 0.96, 140], [W * 0.72, H * 0.97, 150], [W * 0.5, H * 1.0, 180]]) {
+        const g = x.createLinearGradient(px, py - 30, px, py + 30);
+        g.addColorStop(0, '#5a5a66');
+        g.addColorStop(1, '#2a2a34');
+        x.fillStyle = g;
+        x.beginPath();
+        x.ellipse(px, py, rw, 32, 0, 0, U.TAU);
+        x.fill();
+        x.fillStyle = 'rgba(255,255,255,0.08)';
+        x.beginPath();
+        x.ellipse(px - rw * 0.2, py - 14, rw * 0.5, 7, 0, 0, U.TAU);
+        x.fill();
+      }
+      // folded green haori and a sake cup on a stone
+      x.fillStyle = '#3f7a4a';
+      x.fillRect(W * 0.8, H * 0.78, 90, 22);
+      x.fillStyle = '#e8e2d0';
+      x.fillRect(W * 0.8 + 70, H * 0.78, 20, 22);
+      x.fillStyle = '#f2ece0';
+      x.beginPath();
+      x.moveTo(W * 0.1 - 10, H * 0.78 - 14);
+      x.lineTo(W * 0.1 + 10, H * 0.78 - 14);
+      x.lineTo(W * 0.1 + 6, H * 0.78);
+      x.lineTo(W * 0.1 - 6, H * 0.78);
+      x.fill();
+      // moonbeam into the water
+      x.save();
+      x.globalCompositeOperation = 'lighter';
+      const mb = x.createLinearGradient(W * 0.55, 0, W * 0.5, H * 0.8);
+      mb.addColorStop(0, 'rgba(190,210,255,0.22)');
+      mb.addColorStop(1, 'rgba(190,210,255,0)');
+      x.fillStyle = mb;
+      x.beginPath();
+      x.moveTo(W * 0.44, H * 0.1);
+      x.lineTo(W * 0.66, H * 0.1);
+      x.lineTo(W * 0.62, H * 0.8);
+      x.lineTo(W * 0.36, H * 0.8);
+      x.closePath();
+      x.fill();
+      x.restore();
+      vignette(x, 0.5);
+    },
+    anim(x, t) {
+      // falling water streaks
+      x.save();
+      x.globalCompositeOperation = 'lighter';
+      x.strokeStyle = 'rgba(230,245,255,0.35)';
+      x.lineWidth = 2;
+      for (let i = 0; i < 12; i++) {
+        const px = W * 0.5 - 40 + i * 7;
+        const off = (t * 420 + i * 53) % 240;
+        x.beginPath();
+        x.moveTo(px, H * 0.22 + off);
+        x.lineTo(px, H * 0.22 + off + 40);
+        x.stroke();
+      }
+      x.restore();
+      // rising steam
+      for (let i = 0; i < 18; i++) {
+        const px = (i * 83 + t * 12) % (W + 200) - 100, py = H * 0.86 - ((t * 20 + i * 57) % 320);
+        const rr = 70 + (i % 4) * 24;
+        const g = x.createRadialGradient(px, py, 0, px, py, rr);
+        g.addColorStop(0, 'rgba(255,255,255,0.1)');
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        x.fillStyle = g;
+        x.fillRect(px - rr, py - rr, rr * 2, rr * 2);
+      }
+    },
+    weather: 'fireflies',
+  };
+
+  DEF.tsunade_room = {
+    paint(x) {
+      x.fillStyle = '#1e140e';
+      x.fillRect(0, 0, W, H);
+      shojiWall(x, 0, 30, W, H * 0.58, { panelW: 150, glow: '#e8b878', frame: '#3a2418' });
+      // a panel slid open onto the moonlit garden
+      const ox = W * 0.08, ow = 280;
+      const g = x.createLinearGradient(0, 38, 0, H * 0.58);
+      g.addColorStop(0, '#0a1030');
+      g.addColorStop(1, '#1e2448');
+      x.fillStyle = g;
+      x.fillRect(ox, 38, ow, H * 0.58 - 46);
+      x.save();
+      x.beginPath();
+      x.rect(ox, 38, ow, H * 0.58 - 46);
+      x.clip();
+      stars(x, 40, 191, H * 0.3);
+      moon(x, ox + ow * 0.3, 110, 26);
+      tree(x, ox + ow * 0.7, H * 0.6, 260, { seed: 193, trunk: '#1a1216', leaf: '#6a3a5a', blossom: 30 });
+      x.restore();
+      x.fillStyle = '#3a2418';
+      x.fillRect(0, 16, W, 18);
+      x.fillRect(0, H * 0.58 - 8, W, 12);
+      for (const px of [0, ox + ow, W * 0.62, W - 36]) x.fillRect(px, 16, 36, H * 0.58 - 4);
+      // hanging scroll: 賭 (a gamble)
+      x.fillStyle = '#efe4cc';
+      x.fillRect(W * 0.7, 70, 80, 200);
+      x.fillStyle = '#4a2a1a';
+      x.fillRect(W * 0.7 - 6, 64, 92, 8);
+      x.fillRect(W * 0.7 - 6, 268, 92, 8);
+      x.fillStyle = '#1e1a1a';
+      x.font = 'bold 50px serif';
+      x.textAlign = 'center';
+      x.textBaseline = 'middle';
+      x.fillText('賭', W * 0.7 + 40, 150);
+      x.fillStyle = '#b8321e';
+      x.fillRect(W * 0.7 + 30, 222, 20, 20);
+      // her green haori on a stand
+      x.fillStyle = '#4a3020';
+      x.fillRect(W * 0.9 - 70, 110, 140, 8);
+      x.fillRect(W * 0.9 - 4, 110, 8, 250);
+      x.fillStyle = '#3f7a4a';
+      x.beginPath();
+      x.moveTo(W * 0.9 - 66, 118);
+      x.lineTo(W * 0.9 + 66, 118);
+      x.lineTo(W * 0.9 + 76, 330);
+      x.lineTo(W * 0.9 - 76, 330);
+      x.closePath();
+      x.fill();
+      x.fillStyle = '#f2ece0';
+      x.font = 'bold 34px serif';
+      x.fillText('賭', W * 0.9, 250);
+      floor(x, H * 0.58, 'tatami');
+      // the futon, turned down, deep plum quilt
+      const mat = new Path2D();
+      mat.moveTo(W * 0.3, H * 0.66);
+      mat.lineTo(W * 0.78, H * 0.66);
+      mat.lineTo(W * 0.9, H * 0.98);
+      mat.lineTo(W * 0.18, H * 0.98);
+      mat.closePath();
+      x.fillStyle = '#f4efe6';
+      x.fill(mat);
+      for (const px of [W * 0.4, W * 0.6]) {
+        const pg = x.createLinearGradient(0, H * 0.64, 0, H * 0.72);
+        pg.addColorStop(0, '#ffffff');
+        pg.addColorStop(1, '#d8d0c4');
+        x.fillStyle = pg;
+        x.beginPath();
+        x.ellipse(px, H * 0.69, 80, 22, 0, 0, U.TAU);
+        x.fill();
+      }
+      const quilt = new Path2D();
+      quilt.moveTo(W * 0.24, H * 0.8);
+      quilt.bezierCurveTo(W * 0.4, H * 0.74, W * 0.52, H * 0.84, W * 0.66, H * 0.78);
+      quilt.bezierCurveTo(W * 0.74, H * 0.75, W * 0.8, H * 0.78, W * 0.84, H * 0.8);
+      quilt.lineTo(W * 0.92, H);
+      quilt.lineTo(W * 0.14, H);
+      quilt.closePath();
+      const qg = x.createLinearGradient(0, H * 0.76, 0, H);
+      qg.addColorStop(0, '#8a2a4a');
+      qg.addColorStop(1, '#4a1226');
+      x.fillStyle = qg;
+      x.fill(quilt);
+      x.save();
+      x.clip(quilt);
+      x.strokeStyle = 'rgba(255,200,220,0.25)';
+      x.lineWidth = 2;
+      const r = U.rng(77);
+      for (let i = 0; i < 26; i++) {
+        const px = W * 0.16 + r() * W * 0.74, py = H * 0.8 + r() * H * 0.2;
+        x.beginPath();
+        for (let k = 0; k < 5; k++) {
+          const a = (k / 5) * U.TAU;
+          x.moveTo(px, py);
+          x.lineTo(px + Math.cos(a) * 8, py + Math.sin(a) * 6);
+        }
+        x.stroke();
+      }
+      x.restore();
+      // dinner remains and sake on a low table
+      lowTable(x, W * 0.12, H * 0.9, 220, { sake: true });
+      // candles and an andon lamp
+      for (const [px, py] of [[W * 0.24, H * 0.64], [W * 0.84, H * 0.64], [W * 0.95, H * 0.9]]) candle(x, px, py);
+      const ax = W * 0.96, ay = H * 0.62;
+      x.fillStyle = '#f2d8a0';
+      x.fillRect(ax - 26, ay - 96, 52, 90);
+      x.strokeStyle = '#3a2418';
+      x.lineWidth = 4;
+      x.strokeRect(ax - 26, ay - 96, 52, 90);
+      vignette(x, 0.55);
+    },
+    anim(x, t) {
+      for (const [px, py] of [[W * 0.24, H * 0.64 - 34], [W * 0.84, H * 0.64 - 34], [W * 0.95, H * 0.9 - 34]]) flame(x, px, py, t);
+      glow(x, W * 0.96, H * 0.62 - 50, 240, '#ffc078', 0.35 + Math.sin(t * 2) * 0.02);
+      glow(x, W * 0.5, H * 0.8, 600, '#ff9a6a', 0.08);
+    },
+  };
 })();

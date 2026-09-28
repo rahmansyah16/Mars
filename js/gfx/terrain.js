@@ -12,7 +12,7 @@
     void: { layer: -1, walk: false, color: '#07070b' },
     water: { layer: 0, walk: false, color: '#3f8fc4', water: true },
     deep: { layer: 0.1, walk: false, color: '#2b6c9e', water: true, soft: true },
-    spring: { layer: 0.2, walk: false, color: '#5fc9c4', water: true, spring: true },
+    spring: { layer: 0.2, walk: false, color: '#5fc9c4', water: true, spring: true, soft: true },
     grass: { layer: 1, walk: true, color: '#6fae4a', soft: true, edge: 'shore' },
     grass2: { layer: 1.1, walk: true, color: '#62a043', soft: true, edge: 'shore', base: 'grass' },
     forest: { layer: 1.2, walk: true, color: '#4c8a3a', soft: true, edge: 'shore' },

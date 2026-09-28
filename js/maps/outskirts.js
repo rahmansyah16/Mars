@@ -84,9 +84,16 @@
       const t = grid.cells[y * W + x];
       if (t === 'forest' || t === 'grass2' || t === 'moss') props.push([rng() < 0.6 ? 'tallgrass' : 'mushrooms', x, y, { seed: i, c: rng() < 0.5 ? '#d9534f' : '#e8b04a' }]);
     }
-    built = { grid, props };
+    // keep the path to the hidden grotto (north of the pond) clear of trees
+    const clear = (p) => {
+      const [t, x, y] = p;
+      const w = t === 'bigtree' ? 2 : 1, h = t === 'bigtree' ? 2 : 1;
+      return !(x + w - 1 >= 8 && x <= 11 && y + h - 1 >= 2 && y <= 4);
+    };
+    built = { grid, props: props.filter(clear) };
     return built;
   }
+  const grotto = () => S.qs('r_tsunade2') >= 2 || S.qd('r_tsunade2');
 
   const kurama = () => S.f('kurama_sealed');
   M.forest = {
@@ -111,6 +118,8 @@
         ['flowerbed', 35, 23, { w: 1, h: 1, cols: ['#b8f0c0', '#ffffff'] }],
         ['sign', 2, 16, { text: '← KONOHA', size: 11 }],
         ['reeds', 7, 5, {}], ['reeds', 11, 6, { seed: 3 }],
+        ['cave_mouth', 9, 2, { if: grotto }],
+        ['sign', 11, 3, { text: '♨', size: 16, if: grotto }],
       ]);
     },
     emitters: [
@@ -120,6 +129,7 @@
       { type: 'sparkle', x: 35, y: 23, rate: 2, color: '#b8ffc8' },
       { type: 'sparkle', x: 38, y: 7, w: 2, h: 2, rate: 3, color: '#c86aff' },
       { type: 'embers', x: 41, y: 31, rate: 4 },
+      { type: 'steam', x: 9, y: 2, w: 2, h: 1, rate: 3, if: grotto },
     ],
     npcs: [
       { key: 'chunin', char: 'chunin', x: 16, y: 21, dir: 'down', pose: 'lie', fixed: true, talk: 'forest_chunin', if: () => S.qs('main1') >= 3 && !S.f('chunin_found') },
@@ -154,9 +164,45 @@
       { x: 34, y: 6, w: 2, h: 6, on: 'touch', run: 'nue_confront', if: () => S.qs('main1') === 4 && !S.f('nue_defeated') },
       { x: 34, y: 6, w: 2, h: 6, on: 'touch', run: 'clearing_early', if: () => S.qs('main1') === 3 && !S.f('clearing_warned') },
       { on: 'enter', x: 0, y: 0, run: 'forest_enter', if: () => S.qs('main1') === 3 && !S.f('forest_intro') },
+      { x: 9, y: 2, w: 2, on: 'touch', to: ['hidden_spring', 9, 11, 'up'], if: grotto },
     ],
     spawns: { default: [1, 18, 'right'], cave: [23, 4, 'down'] },
   };
 
-  // Herb/lily events need the spot id; the event object is passed to scripts.
+  // ---------- Hidden grotto spring (Tsunade's secret) ----------
+  M.hidden_spring = {
+    name: 'Hidden Grotto', sub: 'An old hot spring nobody remembers', bgm: 'onsen', battleBg: 'cave',
+    dark: 0.42, darkColor: '#060812', nightDark: 0.55, playerLight: 200, weather: 'fireflies',
+    grid: () => {
+      const b = NR.mb(18, 13, 'rock');
+      b.ellipse(9, 6.2, 7.6, 5.4, 'cave');
+      b.patches('moss', 'cave', 0.2, 0.3, 17);
+      b.ellipse(9, 5.4, 4.8, 2.9, 'spring');
+      b.rect(8, 10, 10, 12, 'cave');
+      return b.done();
+    },
+    props: [
+      ['onsen_rock', 3, 5, { seed: 11 }], ['onsen_rock', 14, 5, { seed: 12 }], ['onsen_rock', 5, 8, { seed: 13 }],
+      ['onsen_rock', 12, 8, { seed: 14 }], ['onsen_rock', 6, 2, { seed: 15 }], ['onsen_rock', 11, 2, { seed: 16 }],
+      ['crystal', 2, 3, { c: '#6ae8d0' }], ['crystal', 15, 3, { c: '#b88aff' }], ['crystal', 3, 9, { c: '#b88aff' }], ['crystal', 14, 9, { c: '#6ae8d0' }],
+      ['stalagmite', 2, 7, {}], ['stalagmite', 15, 7, {}],
+      ['bucket', 7, 9, {}],
+    ],
+    emitters: [
+      { type: 'steam', x: 5, y: 3, w: 9, h: 5, rate: 12 },
+      { type: 'sparkle', x: 2, y: 3, w: 1, h: 1, rate: 2, color: '#6ae8d0' },
+      { type: 'sparkle', x: 15, y: 3, w: 1, h: 1, rate: 2, color: '#b88aff' },
+      { type: 'sparkle', x: 3, y: 9, w: 1, h: 1, rate: 2, color: '#b88aff' },
+      { type: 'sparkle', x: 14, y: 9, w: 1, h: 1, rate: 2, color: '#6ae8d0' },
+    ],
+    npcs: [
+      { key: 'tsunade_spring', char: 'tsunade', x: 9, y: 9, dir: 'up', fixed: true, talk: 'tsunade_spring', if: () => S.night() && S.qs('r_tsunade2') === 2 && !S.party('tsunade'), mark: () => 'heart' },
+    ],
+    events: [
+      { x: 8, y: 12, w: 3, on: 'touch', to: ['forest', 9, 3, 'down'] },
+      { x: 4, y: 2, w: 10, h: 7, on: 'action', run: 'spring_bathe' },
+      { on: 'enter', x: 0, y: 0, run: 'hidden_spring_enter' },
+    ],
+    spawns: { default: [9, 11, 'up'] },
+  };
 })();

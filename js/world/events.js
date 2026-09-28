@@ -232,6 +232,7 @@
       },
       leave: (c, silent) => {
         NR.game.removeMember(c);
+        NR.game.flag('companion_' + c, false);
         S().rebuildFollowers();
         if (!silent) NR.ui.toast(`${NR.charName(c)} left the party.`, { icon: '👋' });
       },

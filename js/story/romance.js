@@ -652,6 +652,8 @@
     }
   };
 
+  NR.ROMANCE_CHAT = { hinata: HINATA_CHAT, sakura: SAKURA_CHAT, ino: INO_CHAT, tenten: TENTEN_CHAT, temari: TEMARI_CHAT, tsunade: TSUNADE_CHAT };
+
   // ============================== memories ==============================
   const MEM = {
     hinata: ['hinata1', 'hinata2', 'hinata3'], sakura: ['sakura1', 'sakura2', 'sakura3'], ino: ['ino1', 'ino2', 'ino3'],

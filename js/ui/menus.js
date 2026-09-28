@@ -82,6 +82,17 @@
     ['Jutsu', () => UI.push(new MemberPick((id) => UI.push(new SkillScreen(id))))],
     ['Equip', () => UI.push(new MemberPick((id) => UI.push(new EquipScreen(id))))],
     ['Status', () => UI.push(new MemberPick((id) => UI.push(new StatusScreen(id))))],
+    ['Party Talk', () => {
+      const others = NR.game.state.party.filter((id) => id !== 'naruto');
+      if (!others.length) {
+        NR.audio.sfx('buzzer');
+        return UI.toast('Naruto is travelling alone right now.', { icon: '🍃' });
+      }
+      UI.push(new MemberPick((id) => {
+        while (UI.stack.length) UI.pop();
+        NR.events.run('companion_talk', { self: { char: id } });
+      }, { members: others, title: 'Talk to…' }));
+    }],
     ['Quests', () => UI.push(new QuestScreen())],
     ['Bonds ♥', () => UI.push(new BondScreen())],
     ['Gallery', () => UI.push(new GalleryScreen())],
@@ -96,7 +107,7 @@
       super();
       this.cover = false;
       this.list = new UI.List({
-        x: 70, y: 130, w: 260, rowH: 44, visible: 12,
+        x: 70, y: 126, w: 260, rowH: 41, visible: 13,
         items: CMDS.map(([l]) => ({ label: l })),
         onPick: (i) => CMDS[i][1](),
         onCancel: () => this.close(),
@@ -661,6 +672,7 @@
     ['tenten_1', 'tenten', 'The Stolen Crate'], ['tenten_2', 'tenten', 'Target Practice'], ['tenten_3', 'tenten', 'Polishing Steel'],
     ['temari_1', 'temari', 'Diplomatic Errand'], ['temari_2', 'temari', 'Sparring in the Wind'], ['temari_3', 'temari', 'Rooftops at Midnight'],
     ['tsunade_1', 'tsunade', 'Double or Nothing'], ['tsunade_2', 'tsunade', 'Drinking Contest'], ['tsunade_3', 'tsunade', 'Moonlit Bath for Two'],
+    ['tsunade_4', 'tsunade', 'Night Shift'], ['tsunade_5', 'tsunade', 'Forfeit Dice'], ['tsunade_6', 'tsunade', 'Her True Face'], ['tsunade_7', 'tsunade', 'Stay'],
     ['festival', null, 'The Lantern Festival'], ['ending', null, 'The Seventh Dawn'],
   ];
   MN.MEMORIES = MEMORIES;

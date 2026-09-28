@@ -37,6 +37,7 @@
     charm_ino: { name: 'Ino\'s Hairpin', icon: '📍', type: 'equip', slot: 'charm', price: 0, desc: 'Restores 6 chakra each turn. INT +8.', stats: { int: 8, cpregen: 6 } },
     charm_tenten: { name: 'Tenten\'s Lucky Charm', icon: '🎯', type: 'equip', slot: 'charm', price: 0, desc: 'Critical hits much more likely. Crit +15.', stats: { crit: 15 } },
     charm_temari: { name: 'Temari\'s Fan Ribbon', icon: '🎀', type: 'equip', slot: 'charm', price: 0, desc: 'Light as the desert wind. SPD +10.', stats: { spd: 10 } },
+    charm_tsunade2: { name: 'Senju Hairpin', icon: '🌸', type: 'equip', slot: 'charm', price: 0, desc: 'The pin she wore the night she stopped hiding. HP +80, all stats +7.', stats: { mhp: 80, atk: 7, def: 7, int: 7, res: 7, spd: 7 } },
     charm_tsunade: { name: 'Tsunade\'s Lucky Coin', icon: '🪙', type: 'equip', slot: 'charm', price: 0, desc: 'Her luck finally turned. All stats +5, more ryo from battles.', stats: { atk: 5, def: 5, int: 5, res: 5, spd: 5, ryo: 0.5 } },
     // ----- key items -----
     k_mask: { name: 'Hollow Moon Mask', icon: '🎭', type: 'key', desc: 'A porcelain mask marked with a hollow crescent moon.' },
@@ -48,6 +49,8 @@
     k_documents: { name: 'Suna Treaty Documents', icon: '🗂', type: 'key', desc: 'Sealed diplomatic papers for the Hokage.' },
     k_sake: { name: 'Legendary Sake "Sannin\'s Tears"', icon: '🍶', type: 'key', desc: 'The bottle Tsunade bet — and lost — in a card game.' },
     k_collar: { name: 'Akamaru\'s Collar', icon: '🐾', type: 'key', desc: 'A red collar. Kiba will want this back.' },
+    k_tsunade_key: { name: 'Tsunade\'s Spare Key', icon: '🗝', type: 'key', desc: '"Come home whenever you like." Her house is next to the Moonrise Inn.' },
+    k_tsunade_note: { name: 'Folded Note', icon: '💌', type: 'key', desc: 'Tsunade\'s handwriting: "The old spring in the grotto north of the forest pond. Tonight. Come alone."' },
     k_acadscroll: { name: 'Academy Scroll', icon: '📜', type: 'key', desc: 'The stolen Academy scroll of basic seals.' },
     k_charm: { name: 'Bond Charm', icon: '✨', type: 'key', desc: 'Charms from the people who believe in you. They hum with chakra.' },
     k_ramen1: { name: 'Ramen Order (Iruka)', icon: '🥡', type: 'key', desc: 'Miso ramen for Iruka at the Academy.' },

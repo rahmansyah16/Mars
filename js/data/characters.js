@@ -24,7 +24,9 @@
     onsen: ['onsen', 'bath', 'towel', 'hotspring', 'spring', 'swimsuit', 'bikini', 'handuk', 'mandi', 'renang', 'pantai', 'beach'],
     casual: ['casual', 'date', 'civilian', 'kencan', 'santai'],
     kimono: ['kimono', 'yukata', 'festival', 'matsuri', 'dress', 'gaun', 'pesta'],
-    night: ['night', 'bed', 'sleep', 'pajama', 'lingerie', 'malam', 'tidur', 'kamar'],
+    night: ['night', 'bed', 'sleep', 'pajama', 'lingerie', 'robe', 'malam', 'tidur', 'kamar'],
+    // Tsunade without her Transformation Jutsu
+    aged: ['aged', 'old', 'elder', 'granny', 'tua', 'nenek'],
   };
   // Fallback chain when a portrait for the requested emotion does not exist.
   NR.EMO_FALLBACK = {

@@ -338,8 +338,13 @@
       else if (idx > 0) s += 70 - idx * 10;
       else if (!e.emotions.length) s += 40;
       else s -= 20;
-      if (outfit) s += e.outfits.includes(outfit) ? 60 : e.outfits.length ? -30 : 0;
-      else if (e.outfits.length) s -= 25;
+      // outfits can combine tags ("onsen+aged"): reward each match, penalise foreign tags
+      const want = outfit ? String(outfit).split('+').filter(Boolean) : [];
+      if (want.length) {
+        const hit = want.filter((t) => e.outfits.includes(t)).length;
+        const extra = e.outfits.filter((t) => !want.includes(t)).length;
+        s += hit ? hit * 60 - extra * 30 : e.outfits.length ? -30 : 0;
+      } else if (e.outfits.length) s -= 25;
       if (s > best) {
         best = s;
         top = [it];

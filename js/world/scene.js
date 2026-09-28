@@ -29,7 +29,7 @@
       this.map = new NR.GameMap(mapId);
       this.actors = [];
       this.particles.clear();
-      this.particles.emitters = (def.emitters || []).map((e) => Object.assign({}, e));
+      this.particles.emitters = (def.emitters || []).filter((e) => !e.if || safe(e.if)).map((e) => Object.assign({}, e));
       const st = NR.game.state;
       let sx = spawn.x, sy = spawn.y, sd = spawn.dir;
       if (typeof sx === 'string') {

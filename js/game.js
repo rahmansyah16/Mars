@@ -73,6 +73,16 @@
   G.inParty = (id) => G.state.party.includes(id);
   // Guests join at the hero's level so they are always useful.
   G.addGuest = function (id) {
+    const st = G.state;
+    if (!st.party.includes(id) && st.party.length >= (NR.PARTY_MAX || 4)) {
+      // the story needs this slot: an optional companion heads back to the village
+      const drop = st.party.slice().reverse().find((p) => G.flag('companion_' + p));
+      if (drop) {
+        G.removeMember(drop);
+        G.flag('companion_' + drop, false);
+        NR.ui && NR.ui.toast(`${NR.charName(drop)} heads back to the village.`, { icon: '👋' });
+      }
+    }
     const lv = G.member('naruto').level + 1;
     G.addMember(id, lv);
     const m = G.member(id);

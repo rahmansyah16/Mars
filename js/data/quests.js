@@ -114,6 +114,15 @@
         'Tsunade reserved the moonlit outdoor bath... just for two. (Affection ♥60+, at night)',
       ],
     },
+    r_tsunade2: {
+      title: 'The Slug Princess\'s Secret (Tsunade)', type: 'romance', char: 'tsunade',
+      stages: [
+        'Tsunade has been working late in the hospital\'s research wing. Visit her there after dark.',
+        'Tsunade wants a rematch in her private room at the Moonrise Inn: her game, her rules. (evening or night)',
+        'A note in Tsunade\'s hand: "The old spring in the grotto north of the forest pond. Tonight. Come alone."',
+        'Tsunade invited you to dinner at her house, next to the Moonrise Inn. (evening or night)',
+      ],
+    },
   };
   for (const id in NR.QUESTS) NR.QUESTS[id].id = id;
 

@@ -95,8 +95,10 @@ The launcher lists the files for the game every time it starts, so you can keep 
   | battle | battle, fight, attack, jutsu, tarung, serang |
 
 - **Outfit / scene (optional):** `onsen` (bath, towel, swimsuit, bikini, mandi), `kimono`
-  (yukata, festival, dress), `night` (bed, pajama, lingerie, tidur), `casual` (date, santai).
-  For example `tsunade_onsen_flirty.png` is used in the hot-spring scenes.
+  (yukata, festival, dress), `night` (bed, pajama, lingerie, robe, tidur), `casual` (date,
+  santai), and `aged` (old, tua, nenek: Tsunade without her Transformation Jutsu).
+  For example `tsunade_onsen_flirty.png` is used in the hot-spring scenes, and
+  `tsunade night love.png` in her bedroom scenes.
 
 Pictures without a situation word are used for any situation, and the game varies between a
 character's pictures from scene to scene. Missing situations fall back to the closest match
@@ -169,6 +171,13 @@ You can also drop them into the game's `sprite/` folder and edit them.
 - **Romance side-quests:** three-part stories each for Hinata, Sakura, Ino, Tenten, Temari
   and Tsunade, with affection (♥), gifts (everyone has favourites), bond charms, sensual
   fade-to-black scenes and a gallery where finished scenes can be replayed.
+- **Tsunade's second chapter, "The Slug Princess's Secret":** unlocked after her first route
+  (from chapter 2). A late night in the hospital research wing, forfeit dice in her private
+  room, a hidden grotto spring where she drops her Transformation Jutsu, and dinner at her
+  house. Afterwards you have the key to her house and can spend nights there.
+- **Companions:** once a partner likes you (♥25+) you can ask them to come on missions. They
+  fight with you, and at ♥80 you can use your Bond Combo together. Use **Menu → Party Talk**
+  to chat with them or part ways.
 - **Side quests:** Ichiraku ramen deliveries, finding Akamaru, Rock Lee's challenge, the
   stolen Academy scroll, Tenten's stolen weapons, herbs and moon lilies, and dice with Tsunade.
 - **Battles:** side-view, speed-based turn order, elements (fire › wind › lightning › earth ›

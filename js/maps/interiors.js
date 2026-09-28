@@ -97,6 +97,7 @@
       { key: 'nurse', char: 'vf2', x: 8, y: 3, dir: 'down', fixed: true, talk: 'nurse_talk' },
       { key: 'sakura', char: 'sakura', x: 13, y: 5, dir: 'down', talk: 'sakura_hospital', if: () => !S.party('sakura') && !(S.ch() === 4 && S.qs('main4') === 0), mark: () => (S.qs('main1') === 1 ? '!' : NR.romanceMark('sakura')) },
       { key: 'patient', char: 'vm4', x: 3, y: 4, dir: 'down', talk: 'patient_talk', if: () => S.ch() >= 1 },
+      { key: 'tsunade_lab', char: 'tsunade', x: 15, y: 3, dir: 'down', fixed: true, talk: 'tsunade_lab', if: () => S.night() && S.qs('r_tsunade2') === 0 && !S.party('tsunade'), mark: () => 'heart' },
     ],
     events: [
       { x: 8, y: 11, w: 2, on: 'touch', to: ['konoha', 39, 20, 'down'] },
@@ -206,7 +207,7 @@
     ],
     npcs: [
       { key: 'okami', char: 'okami', x: 8, y: 2, dir: 'down', fixed: true, talk: 'okami_talk' },
-      { key: 'tsunade', char: 'tsunade', x: 16, y: 6, dir: 'left', talk: 'tsunade_talk', if: () => !S.party('tsunade') && !(S.ch() === 4 && S.qs('main4') === 0), mark: () => (S.qs('main2') === 1 ? '!' : NR.romanceMark('tsunade')) },
+      { key: 'tsunade', char: 'tsunade', x: 16, y: 6, dir: 'left', talk: 'tsunade_talk', if: () => !S.party('tsunade') && !(S.ch() === 4 && S.qs('main4') === 0) && !(NR.tsunadeAway && NR.tsunadeAway()), mark: () => (S.qs('main2') === 1 ? '!' : NR.romanceMark('tsunade') || (NR.tsunadeMark && NR.tsunadeMark())) },
       { key: 'dealer', char: 'vm2', x: 18, y: 4, dir: 'left', fixed: true, talk: 'dealer_talk' },
       { key: 'guest', char: 'vf1', x: 2, y: 4, dir: 'down', wander: 1, talk: 'inn_guest' },
       { key: 'hinata_inn', char: 'hinata', x: 4, y: 2, dir: 'down', fixed: true, talk: 'hinata_onsen', if: () => S.night() && S.qs('r_hinata') === 2 && S.aff('hinata') >= 60 && !S.party('hinata'), mark: () => 'heart' },
@@ -216,6 +217,41 @@
       { x: 3, y: 1, on: 'touch', to: ['hot_springs', 10, 12, 'up'] },
     ],
     spawns: { default: [9, 10, 'up'], baths: [3, 2, 'down'] },
+  };
+
+  // ---------- Tsunade's house ----------
+  const tsunadeHome = () => S.eve() && !S.party('tsunade') && (S.qs('r_tsunade2') === 3 || S.qd('r_tsunade2'));
+  M.tsunade_house = {
+    name: 'Tsunade\'s House', sub: 'Konoha', bgm: () => (S.night() ? 'romance' : 'onsen'),
+    wallColor: '#efe2c8', wallTrim: '#3f5a3a', dark: 0.08, nightDark: 0.42,
+    grid: () => {
+      const b = NR.mb(13, 9, 'wall').room(0, 0, 12, 8, 'wood');
+      b.rect(6, 2, 11, 7, 'tatami');
+      b.set(3, 8, 'wood');
+      return b.done();
+    },
+    props: [
+      ['futon', 8, 3, { w: 2, c: '#8a2a4a' }],
+      ['screen', 6, 2, { c: '#3f7a4a' }],
+      ['low_table', 2, 4, { sake: true, food: true }],
+      ['cushion', 1, 5, { c: '#3f7a4a' }],
+      ['cushion', 4, 5, { c: '#8a2a4a' }],
+      ['shelf', 1, 2, { kind: 'jars', seed: 21, c: '#5a3a26' }],
+      ['scroll_hang', 4, 1, { text: '賭' }],
+      ['window_in', 9, 1, {}],
+      ['paper_lantern', 11, 2, { c: '#f6d8a0' }],
+      ['plant', 11, 7, {}],
+      ['plant', 1, 7, { pot: '#3f7a4a' }],
+      ['exit', 3, 8, {}],
+    ],
+    npcs: [
+      { key: 'tsunade_home', char: 'tsunade', x: 3, y: 5, dir: 'down', talk: 'tsunade_home', if: tsunadeHome, mark: () => (S.qs('r_tsunade2') === 3 ? 'heart' : null) },
+    ],
+    events: [
+      { x: 3, y: 8, on: 'touch', to: ['konoha', 31, 28, 'down'] },
+      { x: 8, y: 3, w: 2, h: 2, on: 'action', run: 'tsunade_futon' },
+    ],
+    spawns: { default: [3, 7, 'up'] },
   };
 
   // ---------- Outdoor baths ----------

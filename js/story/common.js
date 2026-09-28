@@ -37,6 +37,7 @@
       if (qItem) opts.push({ label: qItem.label, heart: !!qItem.heart, key: 'quest' });
       opts.push({ label: 'Chat', key: 'chat' }, { label: 'Give a gift', key: 'gift' });
       if (o.extra) for (const x of o.extra()) opts.push(x);
+      if (NR.canRecruit(c)) opts.push({ label: 'Come with me on missions', key: 'recruit' });
       opts.push({ label: 'See you later', key: 'bye' });
       const i = await E.choice(opts, { cancel: opts.length - 1 });
       const k = opts[i].key;
@@ -54,6 +55,10 @@
       }
       if (k === 'gift') {
         await NR.giveGift(E, c);
+        continue;
+      }
+      if (k === 'recruit') {
+        if (await NR.recruit(E, c)) return;
         continue;
       }
       const x = opts[i];
@@ -112,6 +117,64 @@
     tenten: { love: 'Peach buns! Okay, you officially get the friends-and-family discount. Maybe more.', like: 'Hey, thanks! That\'s really nice.' },
     temari: { love: 'Roasted chestnuts... just like the ones back home. Hmph. Fine. You win this round.', like: 'Not bad. You have better taste than a certain lazy genius.' },
     tsunade: { love: 'Now we\'re talking! Premium stuff, too. Brat, you might be my favourite person in this village.', like: 'Hoh? Trying to butter me up? ...It\'s working.' },
+  };
+
+  // ---------- companions ----------
+  // Romance partners can fight alongside Naruto (and unlock their Bond Combo at ♥80).
+  NR.PARTY_MAX = 4;
+  NR.canRecruit = (c) => !!NR.CLASSES[c] && !G().inParty(c) && G().aff(c) >= 25 && S.ch() >= 1;
+  const JOIN_LINES = {
+    hinata: ['happy', 'W-with you? Of course! I\'ll protect your back, Naruto-kun.'],
+    sakura: ['happy', 'Finally, you ask. Somebody has to keep you alive out there.'],
+    ino: ['flirty', 'A mission with you? I\'ll bring snacks. And my Mind Transfer, obviously.'],
+    tenten: ['battle', 'Give me a second to grab a few scrolls. ...Okay, forty scrolls. Let\'s go!'],
+    temari: ['flirty', 'Try to keep up. I\'m not waiting for you.'],
+    tsunade: ['flirty', 'Out of retirement for a brat? Hmph. ...Only because it\'s you. Try not to need healing.'],
+  };
+  const LEAVE_LINES = {
+    hinata: ['happy', 'I\'ll be in the park if you need me. Or the Hyuga garden.'],
+    sakura: ['happy', 'I\'ll be at the hospital. Try not to break anything without me.'],
+    ino: ['happy', 'Back to the shop! Come visit, okay?'],
+    tenten: ['happy', 'I\'ll be at the armory. Sharpening things. Lovingly.'],
+    temari: ['neutral', 'I\'ll be around. You\'ll find me.'],
+    tsunade: ['flirty', 'Back to the inn, then. You know where to find me — and when.'],
+  };
+  NR.recruit = async function (E, c) {
+    if (G().state.party.length >= NR.PARTY_MAX) {
+      await E.say(c, 'sad', 'Your team is full right now. Make some room and ask me again.');
+      return false;
+    }
+    const [emo, line] = JOIN_LINES[c] || ['happy', 'Let\'s go!'];
+    await E.say(c, emo, line);
+    E.join(c);
+    G().flag('companion_' + c, true);
+    return true;
+  };
+  // Talk to someone travelling with you (main menu → Party).
+  SC.companion_talk = async (E, self) => {
+    const c = self && self.char;
+    if (!c) return;
+    const romance = NR.ROMANCE.includes(c);
+    const comp = G().flag('companion_' + c);
+    const opts = [{ label: 'Chat', key: 'chat' }];
+    if (romance && (NR.romanceStep(c) || (c === 'tsunade' && NR.tsunadeMark && G().qDone('r_tsunade') && !G().qDone('r_tsunade2')))) opts.push({ label: 'About us...', heart: true, key: 'us' });
+    if (comp) opts.push({ label: 'Part ways for now', key: 'leave' });
+    opts.push({ label: 'Never mind', key: 'bye' });
+    const i = await E.choice(opts, { cancel: opts.length - 1 });
+    const k = opts[i].key;
+    if (k === 'chat') {
+      if (romance) await NR.romanceChat(E, c, NR.ROMANCE_CHAT && NR.ROMANCE_CHAT[c]);
+      else await E.say(c, 'happy', U.pick(['Stay focused, Naruto.', 'Hn.', 'Let\'s keep moving.']));
+    } else if (k === 'us') {
+      await E.say(c, 'blush', 'Not with everyone watching... Let me go back to my usual spot, and come find me there.');
+      if (comp) {
+        E.leave(c);
+      }
+    } else if (k === 'leave') {
+      const [emo, line] = LEAVE_LINES[c] || ['happy', 'See you around.'];
+      await E.say(c, emo, line);
+      E.leave(c);
+    }
   };
 
   // ---------- shops & services ----------
