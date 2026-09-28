@@ -77,7 +77,7 @@
     await E.say('naruto', 'battle', 'Bring it on!');
     let hits = 3;
     if (!replay) {
-      const r = await E.minigame('timing', { theme: 'palm', title: 'Gentle Fist Sparring', rounds: 5, speed: 0.9, zone: 0.22 });
+      const r = await E.minigame('timing', { theme: 'palm', title: 'Gentle Fist Sparring', rounds: 5, speed: 0.9, zone: 0.22, partner: 'hinata' });
       hits = r.hits;
     }
     if (hits >= 3) await E.say('hinata', 'surprised', 'You matched my rhythm... Nobody\'s ever been able to do that. Not even Neji-niisan.');
@@ -314,7 +314,7 @@
   };
   NR.STORY.ino2 = async (E, replay) => {
     await E.say('ino', 'happy', 'Every man should know how to make a proper bouquet. Lesson one: don\'t just grab things. Feel the balance.');
-    if (!replay) await E.minigame('timing', { theme: 'flower', title: 'Ino\'s Flower Lesson', rounds: 4, speed: 0.8, zone: 0.24 });
+    if (!replay) await E.minigame('timing', { theme: 'flower', title: 'Ino\'s Flower Lesson', rounds: 4, speed: 0.8, zone: 0.24, partner: 'ino' });
     await E.narrate('Ino stands close behind you, her hands over yours as you arrange the last stems.');
     await E.say('ino', 'flirty', 'Want to know a secret? I could read your mind right now. One little jutsu...');
     await E.say('naruto', 'surprised', 'D-don\'t you dare!');
@@ -416,7 +416,7 @@
     await E.narrate('Tenten steps behind you and guides your arm, her chin almost on your shoulder.');
     await E.say('tenten', 'neutral', 'Elbow up. Relax your shoulder. Breathe out when you release...');
     let hits = 3;
-    if (!replay) hits = (await E.minigame('timing', { theme: 'target', title: 'Tenten\'s Target Practice', rounds: 5, speed: 1, zone: 0.2 })).hits;
+    if (!replay) hits = (await E.minigame('timing', { theme: 'target', title: 'Tenten\'s Target Practice', rounds: 5, speed: 1, zone: 0.2, partner: 'tenten' })).hits;
     if (hits >= 4) await E.say('tenten', 'surprised', 'Four bullseyes?! Okay, okay — maybe I\'m a good teacher.');
     else await E.say('tenten', 'happy', 'Not bad! We\'ll make a weapons master out of you yet.');
     await E.narrate('You turn around. She\'s still standing very, very close.');
@@ -593,7 +593,7 @@
     await E.backdrop('inn_room');
     await E.say('tsunade', 'flirty', 'You\'re a man now, Naruto. Let\'s see if you can drink like one. First to fall over pays.');
     let hits = 3;
-    if (!replay) hits = (await E.minigame('timing', { theme: 'sake', title: 'Drinking Contest vs. Tsunade', rounds: 4, speed: 0.8, zone: 0.24, wobble: 1.2 })).hits;
+    if (!replay) hits = (await E.minigame('timing', { theme: 'sake', title: 'Drinking Contest vs. Tsunade', rounds: 4, speed: 0.8, zone: 0.24, wobble: 1.2, partner: 'tsunade' })).hits;
     if (hits >= 3) await E.say('tsunade', 'surprised', 'Still standing?! Nobody out-drinks me! ...Nobody except Jiraiya on his birthday.');
     else await E.say('tsunade', 'happy', 'Ha! Down you go. Your whiskers turn pink when you\'re drunk, did you know?');
     await E.narrate('Later, she leans her head on your shoulder, cup dangling from her fingers.');
