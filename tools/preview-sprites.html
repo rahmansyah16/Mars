@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Sprite preview</title>
+<style>body{margin:0;background:#6d8f5a;font:12px sans-serif;color:#fff}canvas{display:block}</style></head>
+<body>
+<canvas id="c"></canvas>
+<script src="../js/core/util.js"></script>
+<script>window.NR.engine = { cpr: 1, on(){} }; window.NR.TS = 64;</script>
+<script src="../js/data/characters.js"></script>
+<script src="../js/gfx/spritegen.js"></script>
+<script>
+// Dev tool: shows every generated sprite sheet. Options: ?scale=2&ids=naruto,hinata&cols=4
+const params = new URLSearchParams(location.search);
+const scale = +(params.get('scale') || 2);
+const only = params.get('ids');
+const ids = only ? only.split(',') : Object.keys(NR.CHARS);
+const fs = Math.round(48 * scale);
+const cols = +(params.get('cols') || 4);
+const cellW = fs * 3 + 20, cellH = fs * 4 + 30;
+const c = document.getElementById('c');
+c.width = cellW * cols; c.height = cellH * Math.ceil(ids.length / cols);
+const x = c.getContext('2d');
+ids.forEach((id, i) => {
+  const sheet = NR.spritegen.build(NR.CHARS[id].look, scale, id);
+  const cx = (i % cols) * cellW + 10, cy = Math.floor(i / cols) * cellH + 20;
+  x.fillStyle = 'rgba(0,0,0,0.15)'; x.fillRect(cx - 4, cy - 4, fs * 3 + 8, fs * 4 + 8);
+  x.drawImage(sheet, cx, cy);
+  x.fillStyle = '#fff'; x.fillText(id, cx, cy - 8);
+});
+window.done = true;
+</script>
+</body></html>

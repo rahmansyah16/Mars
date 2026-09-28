@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Portrait preview</title>
+<style>body{margin:0;background:#27304a;font:14px sans-serif;color:#fff}canvas{display:block}</style></head>
+<body>
+<canvas id="c"></canvas>
+<script src="../js/core/util.js"></script>
+<script>window.NR.engine = { cpr: 1, on(){} }; window.NR.TS = 64;</script>
+<script src="../js/data/characters.js"></script>
+<script src="../js/gfx/spritegen.js"></script>
+<script src="../js/gfx/portraitgen.js"></script>
+<script>
+// Dev tool: ?ids=naruto,hinata&emos=neutral,happy&outfit=onsen&scale=0.5
+const q = new URLSearchParams(location.search);
+const ids = (q.get('ids') || 'naruto,hinata,sakura,ino,tenten,temari,tsunade,kakashi').split(',');
+const emos = (q.get('emos') || 'neutral').split(',');
+const outfit = q.get('outfit') || null;
+const s = +(q.get('scale') || 0.5);
+const cw = 400 * s + 10, chh = 500 * s + 24;
+const perRow = emos.length > 1 ? emos.length : +(q.get('cols') || 8);
+const n = ids.length * emos.length;
+const c = document.getElementById('c');
+c.width = cw * perRow; c.height = chh * Math.ceil(n / perRow);
+const x = c.getContext('2d');
+let i = 0;
+for (const id of ids) for (const e of emos) {
+  const img = NR.portraitgen.render(Object.assign({ id }, NR.CHARS[id]), e, outfit, s);
+  const px = (i % perRow) * cw + 5, py = Math.floor(i / perRow) * chh + 20;
+  x.fillStyle = 'rgba(255,255,255,0.06)'; x.fillRect(px, py, 400 * s, 500 * s);
+  x.drawImage(img, px, py);
+  x.fillStyle = '#fff'; x.fillText(id + ' / ' + e, px + 2, py - 6);
+  i++;
+}
+window.done = true;
+</script>
+</body></html>

@@ -1,0 +1,16 @@
+Put your character pictures (avatars) in this folder.
+
+Name each file (or a sub-folder) after the character, plus an optional situation word:
+
+  Hinata/hinata smile.png
+  Hinata/hinata_blush.jpg
+  sakura_angry.png
+  Tsunade - onsen flirty.png
+
+Situation words (English or Indonesian): neutral, happy/senyum, sad/sedih, angry/marah,
+surprised/kaget, blush/malu, flirty/genit, love/cinta, serious/serius, hurt/sakit, battle/tarung.
+Optional outfit words: onsen, kimono, night, casual.
+
+Then start the game with Play.bat (Windows) or play.sh (Mac/Linux),
+or open index.html and use Art Setup -> Import folder.
+Anything that isn't recognised can be fixed by hand in Art Setup.

@@ -1,0 +1,43 @@
+Naruto             Naruto Uzumaki
+Hinata             Hinata Hyuga
+Sakura             Sakura Haruno
+Ino                Ino Yamanaka
+Tenten             Tenten
+Temari             Temari of the Sand
+Tsunade            Tsunade Senju
+Shizune            Shizune
+Kakashi            Kakashi Hatake
+Sasuke             Sasuke Uchiha
+Shikamaru          Shikamaru Nara
+Rock_Lee           Rock Lee
+Kiba               Kiba Inuzuka
+Choji              Choji Akimichi
+Shino              Shino Aburame
+Sai                Sai Yamanaka
+Iruka              Iruka Umino
+Gaara              Gaara of the Sand
+Teuchi             Teuchi
+Ayame              Ayame
+Anko               Anko Mitarashi
+Izumo              Izumo Kamizuki
+Kotetsu            Kotetsu Hagane
+Okami              Okami-san
+Shopkeeper         General Store Clerk
+Kurama             Kurama, the Nine-Tailed Fox
+Akamaru            Akamaru
+Kagen              Kagen of the Hollow Moon
+Mizuchi            Mizuchi the Serpent
+Nue                Nue, the Masked Rogue
+Hollow_Moon_Soldier Hollow Moon Soldier
+Hollow_Moon_Elite  Hollow Moon Elite
+Rogue_Ninja        Rogue Ninja
+Bandit             Bandit
+Chunin             Leaf Chunin
+Villager_m1        Konoha Villager
+Villager_m2        Konoha Villager
+Villager_m3        Konoha Villager
+Villager_m4        Konoha Villager
+Villager_f1        Konoha Villager
+Villager_f2        Konoha Villager
+Villager_f3        Konoha Villager
+Villager_f4        Konoha Villager

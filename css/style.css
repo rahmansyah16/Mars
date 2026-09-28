@@ -1,0 +1,150 @@
+/* Naruto: Seventh Dawn */
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #05060c;
+  overflow: hidden;
+  font-family: "Segoe UI", "Trebuchet MS", "Noto Sans", Arial, sans-serif;
+  color: #eee;
+  -webkit-user-select: none;
+  user-select: none;
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#game {
+  display: block;
+  background: #000;
+  touch-action: none;
+  outline: none;
+}
+#errors {
+  display: none;
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  max-width: 60vw;
+  background: rgba(120, 10, 20, 0.85);
+  color: #fff;
+  font: 12px/1.4 monospace;
+  padding: 6px 10px;
+  border-radius: 6px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* ---------- Art Setup overlay ---------- */
+.am {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 30% 0%, #2a2250 0%, #0c0e1e 70%);
+  color: #ece6da;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.am.hidden { display: none; }
+.am-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 22px;
+  border-bottom: 2px solid #e8a43a;
+  background: rgba(10, 12, 28, 0.8);
+  flex-wrap: wrap;
+}
+.am-title b { font-size: 24px; color: #ffd28a; display: block; }
+.am-title span { font-size: 13px; color: #b8b0c8; }
+.am-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.am-btn {
+  background: #2a2f54;
+  color: #fff;
+  border: 1px solid #5a5f8a;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.am-btn:hover { background: #3a4070; }
+.am-btn.main { background: #e8842a; border-color: #ffc070; color: #1a0e08; font-weight: 700; }
+.am-btn.main:hover { background: #ff9a3a; }
+.am-btn.warn { background: #5a2a3a; border-color: #9a4a5a; }
+.am-btn.close { background: #1a1c30; }
+.am-tabs { display: flex; gap: 4px; padding: 10px 22px 0; flex-wrap: wrap; }
+.am-tab {
+  background: transparent;
+  color: #b8b0c8;
+  border: 1px solid transparent;
+  border-bottom: none;
+  padding: 8px 16px;
+  font-size: 15px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+}
+.am-tab.on { background: rgba(232, 164, 58, 0.18); color: #ffd28a; border-color: rgba(232, 164, 58, 0.5); }
+.am-status { padding: 8px 22px; font-size: 13px; color: #9ae8a0; border-top: 1px solid rgba(232, 164, 58, 0.3); }
+.am-body { flex: 1; overflow: auto; padding: 12px 22px 40px; }
+.am-note { color: #b8b0c8; font-size: 14px; max-width: 980px; }
+.am-empty { color: #ffe0a8; font-size: 15px; padding: 30px; }
+.am-bar { margin: 6px 0 14px; font-size: 14px; }
+.am-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.am-grid.chars { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.am-card {
+  background: rgba(20, 22, 44, 0.9);
+  border: 1px solid rgba(232, 164, 58, 0.35);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.am-card.char { cursor: pointer; }
+.am-card.char:hover { border-color: #ffd28a; }
+.am-card.ignored { opacity: 0.45; }
+.am-thumb {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0c0e1e;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.am-thumb.big { height: 220px; }
+.am-thumb img, .am-thumbimg { max-width: 100%; max-height: 100%; object-fit: contain; }
+.am-sprite { width: 96px; height: 96px; image-rendering: pixelated; align-self: center; background: rgba(90, 150, 90, 0.25); border-radius: 8px; }
+.am-name { font-weight: 700; color: #ffd28a; }
+.am-sub { font-size: 12px; color: #b8b0c8; }
+.am-file { font-size: 11px; color: #9a96a8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.am-lbl { font-size: 11px; color: #b8b0c8; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+.am-sel { background: #1a1c34; color: #fff; border: 1px solid #4a4f7a; border-radius: 6px; padding: 5px; font-size: 13px; max-width: 100%; }
+.am-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.am-chip {
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 10px;
+  border: 1px solid #4a4f7a;
+  background: #15172c;
+  color: #b8b0c8;
+  cursor: pointer;
+}
+.am-chip.on { background: #e8842a; color: #1a0e08; border-color: #ffc070; font-weight: 700; }
+.am-chip.alt.on { background: #c86aa8; color: #fff; border-color: #ff9ec8; }
+.am-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; gap: 8px; }
+.am-link { background: none; border: none; color: #8ac8ff; cursor: pointer; font-size: 12px; }
+.am-emos { display: flex; gap: 3px; flex-wrap: wrap; }
+.am-dot { min-width: 22px; height: 17px; padding: 0 2px; font-size: 10px; line-height: 17px; text-align: center; border-radius: 8px; background: #2a2c44; color: #6a6680; box-sizing: border-box; }
+.am-dot.on { background: #6ad07a; color: #0a1a0c; font-weight: 700; }
+.am-list { display: flex; flex-direction: column; gap: 8px; }
+.am-mrow { display: flex; gap: 12px; align-items: center; background: rgba(20, 22, 44, 0.9); padding: 8px 12px; border-radius: 10px; }
+.am-mrow .am-file { flex: 1; font-size: 13px; }
+.am-help { max-width: 900px; line-height: 1.55; font-size: 15px; }
+.am-help h3 { color: #ffd28a; margin: 18px 0 6px; }
+.am-help code { background: #1a1c34; padding: 1px 5px; border-radius: 4px; color: #ffd8a8; }
+.am-help table { border-collapse: collapse; font-size: 13px; }
+.am-help td { padding: 3px 12px 3px 0; vertical-align: top; }

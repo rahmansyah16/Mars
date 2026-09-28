@@ -1,0 +1,4 @@
+Optional: put music files here to replace the built-in soundtrack.
+Name them after the track: title, village, forest, battle, boss, romance, night,
+onsen, dungeon, sad, festival, tension, victory, gameover
+(for example village.mp3, battle.ogg, romance.m4a).

@@ -1,0 +1,12 @@
+# written by Play.bat / play.sh on each start
+user-assets.js
+user-assets.js.tmp
+# your own art stays on your computer
+naruto characters/*
+!naruto characters/PUT YOUR CHARACTER PICTURES HERE.txt
+sprite/*
+!sprite/PUT YOUR SPRITE SHEETS HERE.txt
+music/*
+!music/PUT YOUR MUSIC HERE (optional).txt
+.DS_Store
+Thumbs.db
