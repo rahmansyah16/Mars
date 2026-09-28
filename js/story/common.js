@@ -6,13 +6,15 @@
   const SC = NR.SCRIPTS;
   const G = () => NR.game;
 
+  // Chapter in which each romance story can begin (Sakura is busy with the first mission).
+  NR.ROMANCE_FROM = { sakura: 2 };
   // Which romance step is available right now for a character? (null if none)
   NR.romanceStep = function (c) {
     const q = 'r_' + c;
     const st = G().qStage(q);
     if (G().qDone(q)) return null;
     const a = G().aff(c);
-    if (st < 0) return S.ch() >= 1 ? 'start' : null;
+    if (st < 0) return S.ch() >= (NR.ROMANCE_FROM[c] || 1) ? 'start' : null;
     if (st === 0) return 'step1';
     if (st === 1) return a >= 25 ? 'step2' : null;
     if (st === 2) return a >= 60 ? 'step3' : null;

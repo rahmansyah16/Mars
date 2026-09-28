@@ -186,7 +186,7 @@
     }
     if (await NR.bondVisit(E, 'sakura')) return;
     const s = step('sakura');
-    if (s === 'start' && S.ch() >= 2) {
+    if (s === 'start') {
       await E.say('sakura', 'hurt', 'Naruto... sorry, I haven\'t slept. We\'re out of Moonlit Herbs — they only grow in the Outer Forest, and I can\'t leave the hospital.');
       await E.say('naruto', 'battle', 'I\'ll get them! How many?');
       await E.say('sakura', 'happy', 'Three. Pale green leaves that glow a little. You\'ll see them sparkle near the forest paths.');
