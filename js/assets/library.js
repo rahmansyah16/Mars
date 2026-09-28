@@ -73,13 +73,16 @@
     if (toks.some((t) => SPRITE_WORDS.includes(t))) return { kind: 'sprite', rest: segs.slice(-2).join('/') };
     return { kind: 'portrait', rest: segs.slice(-2).join('/'), guessed: true };
   }
-  const SPRITE_WORDS = ['walk', 'walking', 'sprite', 'sprites', 'spritesheet', 'charset', 'charsets', 'chara', 'sheet', 'movement', 'jalan', 'gerak', 'berjalan'];
+  const SPRITE_WORDS = ['walk', 'walking', 'run', 'running', 'sprite', 'sprites', 'spritesheet', 'charset', 'charsets', 'chara', 'sheet', 'strip', 'frames', 'anim', 'animation', 'movement', 'jalan', 'berjalan', 'gerak', 'lari', 'animasi'];
   // Small images shaped like RPG Maker sheets are almost certainly walking sprites.
   function looksLikeSheet(it) {
     const r = it.w / it.h;
     if (Math.abs(r - 0.75) < 0.02 && it.h <= 260) return true;
     if (Math.abs(r - 1.5) < 0.02 && it.h <= 400) return true;
     if (Math.abs(r - 2 / 3) < 0.02 && it.h <= 260) return true;
+    // a strip of frames side by side is never a portrait
+    const n = Math.round(r);
+    if (n >= 2 && Math.abs(r - n) < 0.04 * n && it.h <= 320) return true;
     return false;
   }
 
@@ -137,12 +140,12 @@
     return null;
   }
 
-  function makeItem(path, url, source) {
+  function makeItem(path, url, source, blob) {
     path = norm(path);
     const ext = extOf(path);
     if (!IMG_EXT.includes(ext) && !AUD_EXT.includes(ext)) return null;
     const { kind, rest, guessed } = classify(path);
-    const it = { path, url, source, ext, kind: AUD_EXT.includes(ext) ? 'music' : kind, rest, guessed: !!guessed };
+    const it = { path, url, source, ext, kind: AUD_EXT.includes(ext) ? 'music' : kind, rest, guessed: !!guessed, blob: blob || null };
     it.name = path.split('/').pop();
     it.auto = {
       char: it.kind === 'music' ? null : detectChar(rest),
@@ -165,6 +168,7 @@
       ignore: !!o.ignore,
       layout: o.layout || 'auto',
       scale: o.scale || 1,
+      frames: o.frames || 0,
     };
   };
   A.setOverride = function (path, patch) {
@@ -199,7 +203,41 @@
       setTimeout(() => fin(false), 15000);
       img.decoding = 'async';
       img.src = it.url;
-    });
+    }).then((it) => (it.img && it.blob && /^(gif|webp|png|avif)$/.test(it.ext) ? decodeAnim(it) : it));
+  }
+
+  // Animated GIF / WebP / APNG sprites: split into frames with the browser's ImageDecoder.
+  // Works for imported files (their bytes are available); folder files keep their first frame.
+  async function decodeAnim(it) {
+    if (!window.ImageDecoder) return it;
+    try {
+      const type = it.blob.type || (it.ext === 'gif' ? 'image/gif' : 'image/' + it.ext);
+      if (!(await ImageDecoder.isTypeSupported(type))) return it;
+      const dec = new ImageDecoder({ data: await it.blob.arrayBuffer(), type });
+      await dec.tracks.ready;
+      const tr = dec.tracks.selectedTrack;
+      const count = tr ? tr.frameCount : 1;
+      if (count > 1) {
+        const step = Math.max(1, Math.ceil(count / 12));
+        const frames = [];
+        for (let i = 0; i < count; i += step) {
+          const { image } = await dec.decode({ frameIndex: i });
+          const c = U.canvas(image.displayWidth, image.displayHeight);
+          c.getContext('2d').drawImage(image, 0, 0);
+          image.close();
+          frames.push(c);
+        }
+        if (frames.length > 1) {
+          it.anim = frames;
+          // small animated files without a clear folder are walking sprites, not portraits
+          if (it.guessed && it.kind === 'portrait' && it.w <= 320 && it.h <= 320) it.kind = 'sprite';
+        }
+      }
+      dec.close();
+    } catch (e) {
+      console.warn('could not decode animation', it.path, e);
+    }
+    return it;
   }
 
   const encodePath = (p) => p.split('/').map(encodeURIComponent).join('/');
@@ -216,7 +254,7 @@
     const recs = await NR.storage.blobAll();
     for (const r of recs) {
       if (items.some((i) => i.path === r.path)) continue;
-      const it = makeItem(r.path, URL.createObjectURL(r.blob), 'import');
+      const it = makeItem(r.path, URL.createObjectURL(r.blob), 'import', r.blob);
       if (it) items.push(it);
     }
     await Promise.all(items.filter((i) => i.kind !== 'music').map(loadImage));
@@ -252,7 +290,7 @@
     for (const r of recs) {
       const old = A.byPath[r.path];
       if (old) A.items = A.items.filter((i) => i !== old);
-      const it = makeItem(r.path, URL.createObjectURL(r.blob), 'import');
+      const it = makeItem(r.path, URL.createObjectURL(r.blob), 'import', r.blob);
       if (it) fresh.push(it);
     }
     await Promise.all(fresh.filter((i) => i.kind !== 'music').map(loadImage));
@@ -321,8 +359,16 @@
     // a single picture used for every direction (no walking animation)
     still: { cols: 1, rows: 1, dirs: { down: 0, left: 0, right: 0, up: 0 }, cycle: [0], idle: 0 },
   };
+  // a horizontal strip of square-ish frames (e.g. 6 walking frames side by side)
+  const stripCols = (it) => {
+    const set = (A.overrides[it.path] || {}).frames;
+    if (set) return set;
+    const r = it.w / it.h, n = Math.round(r);
+    return n >= 2 && n <= 16 && Math.abs(r - n) < 0.04 * n ? n : 0;
+  };
   A.LAYOUTS = LAYOUTS;
-  A.layoutNames = ['auto', 'rm', 'rm8-0', 'rm8-1', 'rm8-2', 'rm8-3', 'rm8-4', 'rm8-5', 'rm8-6', 'rm8-7', 'xp', 'lpc', 'frames', 'still'];
+  A.stripCols = (it) => stripCols(it);
+  A.layoutNames = ['auto', 'rm', 'rm8-0', 'rm8-1', 'rm8-2', 'rm8-3', 'rm8-4', 'rm8-5', 'rm8-6', 'rm8-7', 'xp', 'lpc', 'strip', 'frames', 'still'];
 
   A.detectLayout = function (it) {
     const n = it.name;
@@ -331,7 +377,9 @@
     if (Math.abs(r - 0.75) < 0.03) return 'rm';
     if (Math.abs(r - 1.5) < 0.05) return 'rm8-0';
     if (it.w === 832 && it.h >= 1344) return 'lpc';
-    if (Math.abs(r - 2 / 3) < 0.03 || Math.abs(r - 1) < 0.03) return 'xp';
+    if (Math.abs(r - 2 / 3) < 0.03 || Math.abs(r - 1) < 0.03) return it.anim ? 'frames' : 'xp';
+    if (it.anim) return 'frames';
+    if (stripCols(it)) return 'strip';
     // anything else is not a grid we know: show it as one still picture
     return 'still';
   };
@@ -340,7 +388,10 @@
     let ln = layoutName === 'auto' ? A.detectLayout(it) : layoutName;
     if (ln === 'frames') ln = 'still';
     let L, bx = 0, by = 0, bw = it.w, bh = it.h;
-    if (ln.startsWith('rm8')) {
+    if (ln === 'strip') {
+      const n = stripCols(it) || Math.max(2, Math.round(it.w / it.h));
+      L = { cols: n, rows: 1, dirs: { down: 0, left: 0, right: 0, up: 0 }, cycle: [...Array(n).keys()], idle: 0 };
+    } else if (ln.startsWith('rm8')) {
       L = LAYOUTS.rm;
       const idx = +ln.split('-')[1] || 0;
       bw = it.w / 4;
@@ -377,14 +428,43 @@
     const base = toks.filter((t) => !/^\d+$/.test(t) && !ALL_DIR_WORDS.includes(t)).join(' ');
     return { n: +m[1], dir, base };
   };
+  // Frames inside one file: an animated GIF/WebP, or a horizontal strip.
+  function framesOf(it, layout) {
+    if (it.anim && it.anim.length > 1 && (layout === 'auto' || layout === 'frames')) return it.anim;
+    const n = layout === 'strip' || (layout === 'auto' && A.detectLayout(it) === 'strip') ? stripCols(it) || Math.max(2, Math.round(it.w / it.h)) : 0;
+    if (!n) return null;
+    const fw = Math.floor(it.w / n), out = [];
+    for (let i = 0; i < n; i++) {
+      const c = U.canvas(fw, it.h);
+      c.getContext('2d').drawImage(it.img, i * fw, 0, fw, it.h, 0, 0, fw, it.h);
+      out.push(c);
+    }
+    return out;
+  }
+  function looseInfo(it) {
+    const toks = U.tokens(it.name);
+    let dir = null;
+    for (const d in DIR_WORDS) if (toks.some((t) => DIR_WORDS[d].includes(t))) dir = d;
+    const base = toks.filter((t) => !/^\d+$/.test(t) && !ALL_DIR_WORDS.includes(t)).join(' ');
+    return { dir, base };
+  }
   function frameGroup(charId) {
     const groups = {};
     for (const it of A.list('sprite')) {
       const e = A.eff(it);
-      if (e.char !== charId || e.ignore || !it.img || (e.layout !== 'auto' && e.layout !== 'frames')) continue;
+      if (e.char !== charId || e.ignore || !it.img || !['auto', 'frames', 'strip'].includes(e.layout)) continue;
+      const folder = it.path.split('/').slice(0, -1).join('/');
+      const multi = framesOf(it, e.layout);
+      if (multi) {
+        const { dir, base } = looseInfo(it);
+        const k = folder + '|' + base;
+        multi.forEach((c, i) => (groups[k] = groups[k] || []).push({ it: { img: c, w: c.width, h: c.height, path: it.path, src: it }, f: { n: i, dir, base }, multi: true }));
+        continue;
+      }
+      if (e.layout === 'strip') continue;
       const f = A.frameInfo(it) || (e.layout === 'frames' ? { n: 0, dir: null, base: '' } : null);
       if (!f) continue;
-      const k = it.path.split('/').slice(0, -1).join('/') + '|' + f.base;
+      const k = folder + '|' + f.base;
       (groups[k] = groups[k] || []).push({ it, f, forced: e.layout === 'frames' });
     }
     let best = null;
@@ -392,7 +472,7 @@
       const g = groups[k];
       // numbered sheets ("naruto1.png, naruto2.png") must not be mistaken for frames:
       // automatic grouping needs 3+ same-sized files and direction words, 4+ files or odd shapes
-      const forced = g.some((x) => x.forced);
+      const forced = g.some((x) => x.forced || x.multi);
       const same = g.every((x) => x.it.w === g[0].it.w && x.it.h === g[0].it.h);
       const dirs = g.some((x) => x.f.dir);
       const ok = forced || (g.length >= 3 && same && (dirs || g.length >= 4 || A.detectLayout(g[0].it) === 'still'));
@@ -401,6 +481,7 @@
     return best;
   }
   function sheetFromFrames(list) {
+    if (!list || !list.length) return null;
     const byDir = { down: [], left: [], right: [], up: [], any: [] };
     for (const { it, f } of list) byDir[f.dir || 'any'].push({ it, n: f.n });
     for (const d in byDir) byDir[d].sort((a, b) => a.n - b.n);
@@ -430,12 +511,24 @@
       }
     });
     const cycle = cols >= 3 ? [...Array(cols).keys()] : [0, cols - 1];
-    const e = A.eff(list[0].it);
+    const e = A.eff(list[0].it.src || list[0].it);
     return {
       img: c, fw, fh, bx: 0, by: 0, scale: e.scale, smooth: fw > 72, user: true, path: list[0].it.path,
       layout: { cols, rows: 4, dirs: { down: 0, left: 1, right: 2, up: 3 }, cycle, idle: 0 }, layoutName: 'frames',
     };
   }
+
+  // Preview for one file in Art Setup (animated files and strips play their frames).
+  A.previewSheet = function (it) {
+    const e = A.eff(it);
+    const multi = framesOf(it, e.layout);
+    if (multi) {
+      const { dir, base } = looseInfo(it);
+      const sh = sheetFromFrames(multi.map((c, i) => ({ it: { img: c, w: c.width, h: c.height, path: it.path, src: it }, f: { n: i, dir, base } })));
+      if (sh) return sh;
+    }
+    return A.sheetFrom(it, e.layout, e.scale);
+  };
 
   A.spriteFor = function (charId) {
     if (NR.settings.spritePref === 'generated') return null;

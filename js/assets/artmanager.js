@@ -204,7 +204,7 @@
 
   function renderSprites() {
     const items = NR.art.list('sprite');
-    body.appendChild(el('p', { class: 'am-note', text: 'Walking sprites. RPG Maker sheets are detected automatically (3×4 single, 12×8 with 8 characters, XP 4×4, LPC), and numbered frame files such as naruto_walk_down_1.png, naruto_walk_down_2.png… are combined into an animation. If the preview walks wrong, pick another layout. Characters without a sprite use the generated ones (also exported in generated-sprites/).' }));
+    body.appendChild(el('p', { class: 'am-note', text: 'Walking sprites. RPG Maker sheets are detected automatically (3×4 single, 12×8 with 8 characters, XP 4×4, LPC). Numbered frame files (naruto_walk_down_1.png, naruto_walk_down_2.png…), frame strips and animated GIFs are combined into an animation. If the preview walks wrong, pick another layout. Characters without a sprite use the generated ones (also exported in generated-sprites/).' }));
     const pref = el('label', { class: 'am-row', style: 'justify-content:flex-start;margin:0 0 12px;cursor:pointer' }, [
       el('input', {
         type: 'checkbox',
@@ -231,7 +231,7 @@
       previews.push({ cv, it });
       const lay = el('select', { class: 'am-sel', onchange: (ev) => (NR.art.setOverride(it.path, { layout: ev.target.value }), render()) });
       for (const ln of NR.art.layoutNames) {
-        const label = ln === 'auto' ? `Auto (${NR.art.detectLayout(it)})` : ln === 'rm' ? 'RPG Maker single (3×4)' : ln === 'xp' ? 'RPG Maker XP (4×4)' : ln === 'lpc' ? 'LPC (13×21)' : ln === 'frames' ? 'One frame of an animation (numbered files)' : ln === 'still' ? 'Single picture (no animation)' : `RPG Maker 8-sheet, character #${+ln.split('-')[1] + 1}`;
+        const label = ln === 'auto' ? `Auto (${NR.art.detectLayout(it)})` : ln === 'rm' ? 'RPG Maker single (3×4)' : ln === 'xp' ? 'RPG Maker XP (4×4)' : ln === 'lpc' ? 'LPC (13×21)' : ln === 'strip' ? 'Frame strip (frames side by side)' : ln === 'frames' ? 'Animation frames (numbered files or animated GIF)' : ln === 'still' ? 'Single picture (no animation)' : `RPG Maker 8-sheet, character #${+ln.split('-')[1] + 1}`;
         const o = el('option', { value: ln, text: label });
         if (ln === e.layout) o.selected = true;
         lay.appendChild(o);
@@ -246,6 +246,9 @@
           kindSelect(it),
           el('div', { class: 'am-lbl', text: 'Sheet layout' }),
           lay,
+          ...(e.layout === 'strip' || (e.layout === 'auto' && NR.art.detectLayout(it) === 'strip')
+            ? [el('div', { class: 'am-lbl', text: 'Frames in the strip' }), el('input', { type: 'number', class: 'am-sel', min: '2', max: '16', value: String(NR.art.stripCols(it) || 4), onchange: (ev) => (NR.art.setOverride(it.path, { frames: Math.max(2, Math.min(16, +ev.target.value || 0)) }), render()) })]
+            : []),
           el('div', { class: 'am-lbl', text: 'Size' }),
           scale,
           el('label', { class: 'am-row' }, [
@@ -260,8 +263,7 @@
     anim = setInterval(() => {
       t++;
       for (const { cv, it } of previews) {
-        const e = NR.art.eff(it);
-        const sh = NR.art.sheetFrom(it, e.layout, e.scale);
+        const sh = it._preview && it._previewV === NR.art.version ? it._preview : ((it._previewV = NR.art.version), (it._preview = NR.art.previewSheet(it)));
         const x = cv.getContext('2d');
         x.clearRect(0, 0, 96, 96);
         x.imageSmoothingEnabled = sh.smooth;

@@ -122,11 +122,19 @@ RPG Maker sheets are detected automatically:
 Rows are down, left, right, up (RPG Maker order). If a preview in Art Setup walks the wrong
 way, choose another layout there; a size slider is also available.
 
-Sprites saved as **one image per frame** also work: number the files and add a direction
-word, for example `naruto_walk_down_1.png`, `naruto_walk_down_2.png`, `naruto_walk_left_1.png`
-(direction words: down/front/depan, up/back/belakang, left/kiri, right/kanan/side). They are
-combined into an animation automatically; a missing left or right side is mirrored from the
-other one. Any other single picture is shown as a still figure.
+Other kinds of sprite animation work too:
+
+- **One image per frame:** number the files and add a direction word, for example
+  `naruto_walk_down_1.png`, `naruto_walk_down_2.png`, `naruto_walk_left_1.png`
+  (direction words: down/front/depan, up/back/belakang, left/kiri, right/kanan/side).
+- **Frame strips:** frames side by side in one image, such as `sakura_walk_right.png`. Square
+  frames are assumed; you can set the number of frames in Art Setup.
+- **Animated GIF / WebP / APNG:** for example `hinata walk left.gif`. Frames are extracted when
+  the file is added with **Art Setup → Import** (Chrome and Edge); a GIF read straight from the
+  game folder only shows its first frame.
+
+Frames are combined into a walking animation automatically, and a missing left or right side
+is mirrored from the other one. Any other single picture is shown as a still figure.
 
 ### Music (optional)
 

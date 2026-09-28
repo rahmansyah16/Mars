@@ -1,13 +1,18 @@
-Put your walking sprite sheets in this folder.
+Put your walking sprites (sprite animation) in this folder.
 
 Name each file after the character: $Naruto.png, hinata walk.png, Sakura.png ...
-RPG Maker sheets are detected automatically:
-  - single character, 3 frames x 4 directions (e.g. 144x192, file name often starts with $)
-  - 8-character sheets, 12 x 8 frames (e.g. Actor1.png, 576x384) - choose the character in Art Setup
+These are all understood:
+  - RPG Maker single-character sheets, 3 frames x 4 directions (e.g. 144x192,
+    file name often starts with $)
+  - RPG Maker 8-character sheets, 12 x 8 frames (e.g. Actor1.png, 576x384) -
+    choose the character in Art Setup
   - RPG Maker XP (4 x 4) and LPC sheets
-  - one image per frame, numbered with a direction word:
+  - one image per frame, numbered, with a direction word:
       naruto_walk_down_1.png, naruto_walk_down_2.png, naruto_walk_left_1.png ...
     (down/front/depan, up/back/belakang, left/kiri, right/kanan/side)
+  - frame strips (frames side by side): sakura_walk_right.png
+  - animated GIF / WebP: hinata walk left.gif
+    (add these with Art Setup -> Import so every frame is used)
 
-Characters without a sheet use the game's generated sprites
+Characters without a sprite use the game's generated sprites
 (also exported as ready-made RPG Maker sheets in ../generated-sprites).
