@@ -88,6 +88,29 @@
     return res;
   }
 
+  // Very large cut-outs are scaled down once (drawing a 4000px photo every frame is slow).
+  function fitted(item) {
+    const max = 1100 * NR.engine.cpr;
+    if (item.h <= max) return item.img;
+    const key = 'fit|' + item.path + '|' + max;
+    if (cardCache.has(key)) return cardCache.get(key);
+    let src = item.img, w = item.w, h = item.h;
+    // halve repeatedly for a smooth result, then finish at the exact size
+    while (h / 2 > max) {
+      const c = U.canvas(Math.round(w / 2), Math.round(h / 2));
+      c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+      src = c;
+      w = c.width;
+      h = c.height;
+    }
+    const out = U.canvas(Math.round((w * max) / h), max);
+    const x = out.getContext('2d');
+    x.imageSmoothingQuality = 'high';
+    x.drawImage(src, 0, 0, out.width, out.height);
+    cardCache.set(key, out);
+    return out;
+  }
+
   function cleanCard(img, w, h) {
     return { canvas: img, w, h, framed: false };
   }
@@ -97,7 +120,7 @@
     if (!ch) return null;
     const item = NR.art && NR.art.portraitFor(charId, emotion, outfit, M.seed + (emotion ? emotion.length * 7 : 0));
     if (item) {
-      if (isCleanImage(item)) return cleanCard(item.img, item.w, item.h);
+      if (isCleanImage(item)) return cleanCard(fitted(item), item.w, item.h);
       return framedCard(item, ch.color || '#e8a43a');
     }
     if (NO_PORTRAIT.has(charId)) return null;
