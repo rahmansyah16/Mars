@@ -30,6 +30,9 @@
       if (window.NR_DEV && window.NR_DEV.onReady) window.NR_DEV.onReady();
     },
     newGame() {
+      NR.events.running = false;
+      NR.events.depth = 0;
+      NR.battle.active = null;
       NR.game.newGame();
       NR.msg.log = [];
       const st = NR.game.state;
@@ -45,6 +48,7 @@
       while (NR.ui.stack.length) NR.ui.pop();
       NR.events.running = false;
       NR.events.depth = 0;
+      NR.battle.active = null;
       NR.msg.log = [];
       const st = NR.game.state;
       const sc = new NR.MapScene();

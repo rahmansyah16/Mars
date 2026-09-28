@@ -26,7 +26,13 @@
   FX.draw = function (ctx) {
     for (const f of FX.list) {
       ctx.save();
-      f.draw(ctx, U.clamp(f.t / f.dur, 0, 1), f.t);
+      // one misbehaving effect must never stop the rest of the frame from drawing
+      try {
+        f.draw(ctx, U.clamp(f.t / f.dur, 0, 1), f.t);
+      } catch (e) {
+        if (!f.warned) console.warn('fx draw', e);
+        f.warned = true;
+      }
       ctx.restore();
     }
     FX.parts && FX.parts.draw(ctx, { x: 0, y: 0 });
@@ -34,6 +40,7 @@
   const wait = (ms) => NR.engine.wait(ms / (NR.settings.battleSpeed || 1));
   const burst = (x, y, n, o) => FX.parts.burst(x, y, n, o);
   const glow = (ctx, x, y, r, col, a = 1) => {
+    r = Math.max(0.01, r);
     const g = ctx.createRadialGradient(x, y, 0, x, y, r);
     g.addColorStop(0, U.rgba(col, a));
     g.addColorStop(1, U.rgba(col, 0));
@@ -505,7 +512,7 @@
       ctx.lineWidth = 3;
       for (let i = 0; i < 6; i++) {
         ctx.beginPath();
-        ctx.arc(u.cx, u.cy, 60 + k * 900 - i * 40, 0, TAU);
+        ctx.arc(u.cx, u.cy, Math.max(0, 60 + k * 900 - i * 40), 0, TAU);
         ctx.stroke();
       }
     });

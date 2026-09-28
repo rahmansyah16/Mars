@@ -252,6 +252,9 @@
       }
     }
     startEncounter(a) {
+      // one encounter at a time (walking into an enemy used to trigger it twice in one frame)
+      if (NR.events.running || a.engaged || !this.actors.includes(a)) return;
+      a.engaged = true;
       const e = a.enemy;
       this.clickPath = null;
       NR.events.run(async (E) => {
@@ -263,15 +266,44 @@
           this.defeated.add(a.key);
           if (e.once) NR.game.state.defeated[this.mapId + ':' + a.key] = true;
           this.removeActor(a);
+          // a moment to breathe before the next monster can pounce
+          this.enemyCooldown = 1;
           if (e.onWin) await e.onWin(E);
-        } else if (res === 'escape') {
+        } else {
+          a.engaged = false;
           a.x = a.home.x;
           a.y = a.home.y;
           a.px = a.x * TS;
           a.py = a.y * TS;
+          a.moving = false;
           this.enemyCooldown = 2;
         }
       });
+    }
+    // Safety net: if an event is "running" but nothing on screen is waiting for anything
+    // (no window, battle, fade, timer or walking actor) for a few seconds, free the player.
+    watchdog(dt, focus) {
+      const pending =
+        !NR.events.running || !focus || NR.ui.stack.length > 0 || NR.engine.scenes.length > 1 ||
+        NR.engine.tweens.length > 0 || NR.engine.timers.length > 0 || NR.artManager.open ||
+        document.body.classList.contains('dom-overlay') ||
+        this.actors.some((x) => x.moving || x.queue.length || x.waiters.length);
+      if (pending) {
+        this.stuckT = 0;
+        return;
+      }
+      this.stuckT = (this.stuckT || 0) + dt;
+      if (this.stuckT > 4) {
+        this.stuckT = 0;
+        console.warn('event watchdog: releasing a stalled event');
+        NR.events.running = false;
+        NR.events.depth = 0;
+        this.eventBusy = false;
+        this.backdrop = null;
+        NR.msg.close();
+        if (NR.engine.fade.a > 0) NR.engine.fadeIn(300);
+        this.refreshActors();
+      }
     }
     afterEvent() {
       if (this.pendingAutosave && !NR.events.running) {
@@ -342,8 +374,10 @@
       if (free) this.handleInput(dt);
       for (const a of this.actors.slice()) {
         a.update(dt, this);
-        if (a.enemy && free) this.updateEnemy(a, dt);
+        // re-check every time: a step earlier in this loop may have started an event
+        if (a.enemy && free && !NR.events.running) this.updateEnemy(a, dt);
       }
+      this.watchdog(dt, focus);
       if (this.enemyCooldown > 0) this.enemyCooldown -= dt;
       this.particles.update(dt, this.cam, this.map);
       const p = this.player;

@@ -110,9 +110,31 @@
       s.y = (Math.random() * 2 - 1) * p;
     } else s.x = s.y = 0;
 
-    for (const sc of E.scenes) if (sc.update) sc.update(dt, sc === E.top());
-    if (NR.ui) NR.ui.update(dt);
+    // each part is guarded so one failing piece can't freeze everything else
+    for (const sc of E.scenes.slice()) {
+      if (!sc.update) continue;
+      try {
+        sc.update(dt, sc === E.top());
+      } catch (err) {
+        E.reportOnce(err);
+      }
+    }
+    if (NR.ui) {
+      try {
+        NR.ui.update(dt);
+      } catch (err) {
+        E.reportOnce(err);
+      }
+    }
     NR.input.endFrame();
+  };
+  // report a repeating per-frame error only once
+  const seen = new Set();
+  E.reportOnce = function (err) {
+    const k = String((err && err.stack) || err).slice(0, 300);
+    if (seen.has(k)) return;
+    seen.add(k);
+    E.reportError(err);
   };
 
   E.draw = function () {
@@ -133,15 +155,27 @@
     for (let i = start; i < E.scenes.length; i++) {
       const sc = E.scenes[i];
       ctx.save();
-      if (sc.shakeable !== false) ctx.translate(E.shakeFx.x, E.shakeFx.y);
-      sc.draw(ctx);
+      try {
+        if (sc.shakeable !== false) ctx.translate(E.shakeFx.x, E.shakeFx.y);
+        sc.draw(ctx);
+      } catch (err) {
+        E.reportOnce(err);
+      }
       ctx.restore();
     }
     if (E.tint.a > 0 && E.tint.color) {
       ctx.fillStyle = U.rgba(E.tint.color, E.tint.a);
       ctx.fillRect(0, 0, NR.W, NR.H);
     }
-    if (NR.ui) NR.ui.draw(ctx);
+    if (NR.ui) {
+      ctx.save();
+      try {
+        NR.ui.draw(ctx);
+      } catch (err) {
+        E.reportOnce(err);
+      }
+      ctx.restore();
+    }
     if (E.flashFx.a > 0) {
       ctx.fillStyle = U.rgba(E.flashFx.color, E.flashFx.a);
       ctx.fillRect(0, 0, NR.W, NR.H);
@@ -150,7 +184,15 @@
       ctx.fillStyle = U.rgba(E.fade.color, E.fade.a);
       ctx.fillRect(0, 0, NR.W, NR.H);
     }
-    if (NR.ui && NR.ui.drawTop) NR.ui.drawTop(ctx);
+    if (NR.ui && NR.ui.drawTop) {
+      ctx.save();
+      try {
+        NR.ui.drawTop(ctx);
+      } catch (err) {
+        E.reportOnce(err);
+      }
+      ctx.restore();
+    }
   };
 
   // ---------- scenes ----------
@@ -180,7 +222,14 @@
     new Promise((resolve) => {
       const from = {};
       for (const p in to) from[p] = obj[p];
-      E.tweens = E.tweens.filter((t) => t.obj !== obj || !Object.keys(t.to).some((k) => k in to));
+      // a new tween on the same property takes over; the old one still resolves so code
+      // awaiting it (a fade before a battle, a character stepping back...) never hangs
+      const keep = [];
+      for (const t of E.tweens) {
+        if (t.obj === obj && Object.keys(t.to).some((k) => k in to)) t.resolve();
+        else keep.push(t);
+      }
+      E.tweens = keep;
       E.tweens.push({ obj, from, to, ms: Math.max(1, ms), t: 0, ease, resolve });
     });
 

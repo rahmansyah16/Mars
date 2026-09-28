@@ -747,11 +747,13 @@
         const b = new Battle(troop, opts, resolve);
         NR.engine.push(b);
       } else if (i === 1) {
+        NR.battle.active = null;
         NR.engine.pop();
         NR.menus.saveLoad('load').then((ok) => {
           if (!ok) NR.titleScreen.show();
         });
       } else {
+        NR.battle.active = null;
         NR.engine.pop();
         NR.titleScreen.show();
       }
@@ -1142,14 +1144,22 @@
   }
 
   NR.battle = {
+    active: null,
     start(troopId, opts = {}) {
-      return new Promise((resolve) => {
-        const b = new Battle(troopId, opts, resolve);
+      // never run two battles at once: a second request waits for the first one's result
+      if (NR.battle.active) return NR.battle.active;
+      const p = new Promise((resolve) => {
+        const b = new Battle(troopId, opts, (r) => {
+          NR.battle.active = null;
+          resolve(r);
+        });
         NR.engine.fadeOut(250).then(() => {
           NR.engine.push(b);
           NR.engine.fadeIn(300);
         });
       });
+      NR.battle.active = p;
+      return p;
     },
     Battle,
   };

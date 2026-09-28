@@ -185,6 +185,7 @@
       while (UI.stack.length) UI.pop();
       NR.events.running = false;
       NR.events.depth = 0;
+      if (NR.battle) NR.battle.active = null;
       const sc = new TitleScene();
       NR.engine.setScene(sc);
       if (!NR.settings.adultConfirmed) UI.push(new Notice(() => {}));
