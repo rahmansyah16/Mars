@@ -65,6 +65,8 @@
   class Screen {
     constructor() {
       this.t = 0;
+      // full-screen menus hide the menus underneath them (the map still shows, dimmed)
+      this.cover = true;
     }
     update(dt, focus) {
       this.t += dt;
@@ -92,6 +94,7 @@
   class MainMenu extends Screen {
     constructor() {
       super();
+      this.cover = false;
       this.list = new UI.List({
         x: 70, y: 130, w: 260, rowH: 44, visible: 12,
         items: CMDS.map(([l]) => ({ label: l })),
@@ -126,7 +129,7 @@
       });
       // info panel
       const st = NR.game.state;
-      UI.panel(ctx, 960, 110, 270, 250, { r: 16 });
+      UI.panel(ctx, 960, 110, 270, 312, { r: 16 });
       UI.text(ctx, NR.MAPS[st.map] ? NR.MAPS[st.map].name : '', 980, 140, { size: 18, bold: true, color: '#ffd28a', maxW: 230 });
       UI.text(ctx, `Day ${st.day} · ${NR.game.TIME_LABEL[st.time]}`, 980, 172, { size: 17 });
       UI.text(ctx, `💰 ${st.ryo} ryo`, 980, 204, { size: 17 });
@@ -134,8 +137,9 @@
       UI.text(ctx, `Chapter ${st.chapter}`, 980, 268, { size: 17, color: '#c8c0d8' });
       const q = NR.game.activeQuests('main')[0];
       if (q) {
-        const lines = U.wrap((ctx.font = `600 14px ${UI.FONT}`, ctx), q.text, 230).slice(0, 2);
-        lines.forEach((l, j) => UI.text(ctx, l, 980, 300 + j * 20, { size: 14, color: '#e8e2d6' }));
+        UI.text(ctx, q.q.title, 980, 300, { size: 14, bold: true, color: '#ffd28a', maxW: 230 });
+        const lines = U.wrap((ctx.font = `600 14px ${UI.FONT}`, ctx), q.text, 230).slice(0, 5);
+        lines.forEach((l, j) => UI.text(ctx, l, 980, 322 + j * 19, { size: 14, color: '#e8e2d6' }));
       }
       ctx.restore();
       hint(ctx, 'Z/Enter select · X/Esc back');
@@ -164,6 +168,7 @@
   class MemberPick extends Screen {
     constructor(onPick, o = {}) {
       super();
+      this.cover = false;
       this.o = o;
       const party = o.members || NR.game.state.party;
       this.list = new UI.List({
@@ -854,6 +859,7 @@
   class Confirm extends Screen {
     constructor(text, resolve) {
       super();
+      this.cover = false;
       this.text = text;
       this.resolve = resolve;
       this.list = new UI.List({
@@ -961,6 +967,7 @@
   class GiftScreen extends Screen {
     constructor(charId, resolve) {
       super();
+      this.cover = false;
       this.charId = charId;
       this.resolve = resolve;
       const inv = NR.game.state.inv;

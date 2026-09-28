@@ -31,7 +31,14 @@
     }
   };
   UI.draw = function (ctx) {
-    for (const w of UI.stack) if (!w.top) w.draw && w.draw(ctx);
+    let from = 0;
+    UI.stack.forEach((w, i) => {
+      if (w.cover && !w.top) from = i;
+    });
+    for (let i = from; i < UI.stack.length; i++) {
+      const w = UI.stack[i];
+      if (!w.top && w.draw) w.draw(ctx);
+    }
     UI.drawToasts(ctx);
   };
   // Drawn above screen fades (title cards, credits).

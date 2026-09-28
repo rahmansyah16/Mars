@@ -913,7 +913,7 @@
         const sh = NR.sheetOf(u.char);
         if (sh) {
           const dir = u.side === 'party' ? 'left' : 'right';
-          const s = (NR.TS / sh.fw) * (sh.scale || 1) * (u.scale / 1.35);
+          const s = Math.min(NR.TS / sh.fw, (NR.TS * 1.2) / sh.fh) * (sh.scale || 1) * (u.scale / 1.35);
           const moving = Math.abs(u.ox) > 2 && this.active === u;
           const col = u.alive ? (moving ? sh.layout.cycle[Math.floor(t * 10) % sh.layout.cycle.length] : sh.layout.idle) : sh.layout.idle;
           const row = sh.layout.dirs[u.alive ? dir : 'down'];

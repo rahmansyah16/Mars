@@ -193,7 +193,8 @@
       let col = L.idle;
       const walking = this.moving || this.idleT < 0.08;
       if (walking) col = L.cycle[Math.floor(this.stepDist / (TS * 0.5)) % L.cycle.length];
-      const s = (TS / sh.fw) * (sh.scale || 1) * this.scale;
+      // fit the frame to one tile wide, but keep tall frames (single-image sprites) from towering
+      const s = Math.min(TS / sh.fw, (TS * 1.2) / sh.fh) * (sh.scale || 1) * this.scale;
       const dw = sh.fw * s, dh = sh.fh * s;
       ctx.imageSmoothingEnabled = sh.smooth !== false;
       let dy = by - dh + 2 + this.jump;
