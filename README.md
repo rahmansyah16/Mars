@@ -207,3 +207,6 @@ Everything is plain JavaScript in `js/` (no build step):
 - **A picture is used for the wrong character or mood.** Fix it in Art Setup → Portraits.
 - **A sprite walks strangely.** Art Setup → Sprites → choose another layout.
 - **No sound.** Browsers start audio after your first key press or click.
+- **Sent back to Uzushio after the ending.** Older versions replayed the departure at the south
+  gate. Update the game and load your save: the story returns to the epilogue and Naruto offers to
+  sail home.

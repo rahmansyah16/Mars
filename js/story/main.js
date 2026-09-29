@@ -709,6 +709,12 @@
     }
     await E.think('naruto', 'serious', 'The boat that brought us here. There\'s no turning back now.');
   };
+  // After the ending the island can only be reached from an older save, so offer the way home at once.
+  SC.uzushio_after = async (E) => {
+    await E.think('naruto', 'happy', 'Uzushio is quiet now. The boat can take us home whenever we\'re ready.');
+    const i = await E.choice(['Sail back to Konoha', 'Stay a while']);
+    if (i === 0) await E.transfer('konoha', 23, 29, 'up');
+  };
 
   SC.sasuke_arrives = async (E) => {
     E.flag('sasuke_arrives', true);

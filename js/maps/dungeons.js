@@ -136,6 +136,7 @@
       { x: 41, y: 9, on: 'action', run: 'chest_r2' },
       { x: 1, y: 30, w: 9, on: 'touch', run: 'ruins_boat' },
       { on: 'enter', x: 0, y: 0, run: 'ruins_enter', once: 'ruins_entered' },
+      { on: 'enter', x: 0, y: 0, run: 'uzushio_after', if: () => S.f('game_clear') },
     ],
     spawns: { default: [4, 28, 'up'], top: [21, 3, 'down'] },
   };
@@ -159,6 +160,7 @@
     events: [
       { x: 9, y: 15, w: 2, on: 'touch', to: ['ruins', 21, 3, 'down'] },
       { x: 7, y: 9, w: 6, h: 2, on: 'touch', run: 'final_confront', if: () => !S.f('kagen_defeated') },
+      { on: 'enter', x: 0, y: 0, run: 'uzushio_after', if: () => S.f('game_clear') },
     ],
     spawns: { default: [9, 13, 'up'] },
   };

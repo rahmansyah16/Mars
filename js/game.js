@@ -218,7 +218,14 @@
 
   // ---------- quests ----------
   G.quest = (id) => G.state.quests[id] || null;
-  G.qStage = (id) => (G.state.quests[id] ? G.state.quests[id].stage : -1);
+  // A finished quest reads as one past its last stage, so a check like "qs('main4') === 3" only
+  // matches while the quest is still at that step (it used to replay finished chapters).
+  G.qStage = (id) => {
+    const s = G.state.quests[id];
+    if (!s) return -1;
+    const q = NR.QUESTS[id];
+    return s.done && q ? Math.max(s.stage, q.stages.length) : s.stage;
+  };
   G.qDone = (id) => !!(G.state.quests[id] && G.state.quests[id].done);
   G.qActive = (id) => !!(G.state.quests[id] && !G.state.quests[id].done);
   G.setQuest = function (id, stage, silent) {
@@ -336,7 +343,26 @@
     G.state.talked = G.state.talked || {};
     G.state.giftDay = G.state.giftDay || {};
     for (const id of NR.ROMANCE) if (G.state.aff[id] == null) G.state.aff[id] = 0;
+    G.repairStory();
     return true;
+  };
+
+  // Older versions could replay a finished chapter (the south gate re-ran the departure for
+  // Uzushio after the ending), which put the save back in chapter 5 with an unfinishable quest.
+  // Restore the chapter and quests the save had really reached.
+  const MAIN = ['main1', 'main2', 'main3', 'main4', 'main5'];
+  G.repairStory = function () {
+    const qs = G.state.quests;
+    const finish = (id) => {
+      if (!G.qDone(id)) qs[id] = { stage: NR.QUESTS[id].stages.length - 1, done: true, t: (qs[id] && qs[id].t) || Date.now() };
+    };
+    if (G.flag('game_clear')) finish('main5');
+    // each main quest only starts once the one before it is finished
+    for (let i = MAIN.length - 2; i >= 0; i--) if (qs[MAIN[i + 1]]) finish(MAIN[i]);
+    // and finishing main quest n moves the story on to chapter n + 1
+    MAIN.forEach((id, i) => {
+      if (G.qDone(id)) G.state.chapter = Math.max(G.state.chapter, i + 2);
+    });
   };
 
   // Short state helpers used by map conditions and scripts.
